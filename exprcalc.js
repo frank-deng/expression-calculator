@@ -40,8 +40,8 @@ var lexTable = [
 	},
 ];
 function lexParser(input){
-	var result = [], count = 10000;
-	while (input.length && --count) {
+	var result = [];
+	while (input.length) {
 		var token = undefined;
 		for (var i = 0; i < lexTable.length; i++) {
 			token = lexTable[i](input);
@@ -62,28 +62,28 @@ function lexParser(input){
 var operand = {
 	'+': {
 		binocular: true,
-		priority: 1,
+		priority: 10,
 		processor: function(a, b) {
 			return a+b;
 		}
 	},
 	'-': {
 		binocular: true,
-		priority: 1,
+		priority: 10,
 		processor: function(a, b) {
 			return a-b;
 		}
 	},
 	'*': {
 		binocular: true,
-		priority: 10,
+		priority: 20,
 		processor: function(a, b) {
 			return a*b;
 		}
 	},
 	'/': {
 		binocular: true,
-		priority: 10,
+		priority: 20,
 		processor: function(a, b) {
 			if (b == 0) {
 				throw 'Division By Zero';
@@ -93,7 +93,7 @@ var operand = {
 	},
 	'NEG': {
 		binocular: false,
-		priority: 20,
+		priority: 50,
 		processor: function(a) {
 			return -a;
 		}
@@ -127,7 +127,7 @@ function rplParse(tokens) {
 
 					if (operand[token_pop.content].binocular) {
 						if (verification <= 1) {
-							throw {error:"Unexpected Operand", token:token_pop};
+							throw {error:"Syntax Error"};
 						}
 						verification--;
 					}
@@ -143,7 +143,7 @@ function rplParse(tokens) {
 					token_pop = stack_oper.pop();
 					if (operand[token_pop.content].binocular) {
 						if (verification <= 1) {
-							throw {error:"Unexpected Operand", token:token_pop};
+							throw {error:"Syntax Error"};
 						}
 						verification--;
 					}
@@ -158,7 +158,7 @@ function rplParse(tokens) {
 			throw {error:"Unmatched Bracket", token:token_pop};
 		} else if (operand[token_pop.content].binocular) {
 			if (verification <= 1) {
-				throw {error:"Unexpected Operand", token:token_pop};
+				throw {error:"Syntax Error"};
 			}
 			verification--;
 		}
@@ -167,7 +167,7 @@ function rplParse(tokens) {
 	return stack_main;
 }
 function rplCalc(tokens, vars) {
-	var stack = new Array(), a, b;
+	var stack = new Array();
 	for (var i = 0; i < tokens.length; i++) {
 		var token = tokens[i];
 		if (token.type == NUMBER) {
@@ -181,32 +181,35 @@ function rplCalc(tokens, vars) {
 		} else if (token.type == OPER){
 			//Calculate by opers
 			var operand_data = operand[token.content];
-			if (undefined === operand_data) {
-				throw {error:"Invalid Operand", token:token};
+			if (undefined !== operand_data) {
+				throw "Calculation Error";
 			} else if (operand_data.binocular) {
 				if (stack.length <= 1) {
-					throw {error:"Syntax Error", stack:stack};
+					throw "Calculation Error";
 				}
-				b = stack.pop();
-				a = stack.pop();
+				var b = stack.pop(), a = stack.pop();
 				stack.push(operand_data.processor(a,b));
 			} else {
 				if (stack.length < 1) {
-					throw {error:"Syntax Error", stack:stack};
+					throw "Calculation Error";
 				}
 				stack.push(operand_data.processor(stack.pop()));
 			}
 		}
 	}
+	if (stack.length != 1) {
+		throw "Calculation Error";
+	}
+	return stack[0];
 }
 
 //var expr = '3+(-3.1+4)*5+a';
 var util = require('util');
-var expr = '3+*(-3.1-4)*5';
+var expr = '3+-(-3.1-4)*5';
 try {
 	console.log(expr);
 	console.log(rplParse(lexParser(expr)));
-	//console.log(rplCalc(rplParse(lexParser(expr))));
+	console.log(rplCalc(rplParse(lexParser(expr))));
 } catch(e) {
 	console.log(e);
 }
