@@ -18,7 +18,7 @@ var lexTable = [
 		return false;
 	},
 	function(input) {
-		var match = /^[A-Za-z_][A-Za-z0-9_\-\u0080-\uffff]*/g.exec(input);
+		var match = /^[A-Za-z_\u0080-\uffff][A-Za-z0-9_\-\u0080-\uffff]*/g.exec(input);
 		if (match) {
 			return {type:LABEL, len:match[0].length, content:match[0]};
 		}
@@ -54,22 +54,54 @@ function lexParser(input){
 			}
 		}
 		if (!token) {
-			throw 'Unexpected Character: ' + input[0];
+			throw {error:"Unexpected Character", token:input[0]};
 		}
 	}
 	return result;
 }
+var operand = {
+	'+': {
+		binocular: true,
+		priority: 1,
+		processor: function(a, b) {
+			return a+b;
+		}
+	},
+	'-': {
+		binocular: true,
+		priority: 1,
+		processor: function(a, b) {
+			return a-b;
+		}
+	},
+	'*': {
+		binocular: true,
+		priority: 10,
+		processor: function(a, b) {
+			return a*b;
+		}
+	},
+	'/': {
+		binocular: true,
+		priority: 10,
+		processor: function(a, b) {
+			if (b == 0) {
+				throw 'Division By Zero';
+			}
+			return a/b;
+		}
+	},
+	'NEG': {
+		binocular: false,
+		priority: 20,
+		processor: function(a) {
+			return -a;
+		}
+	},
+}
 function rplParse(tokens) {
 	var stack_main = new Array(), stack_oper = new Array();
 	var token_pop, verification = 0;
-	var double_oper = ['+', '-', '*', '/'];
-	var priority = {
-		'+': 1,
-		'-': 1,
-		'*': 10,
-		'/': 10,
-		'NEG': 20,
-	}
 
 	for (var i = 0; i < tokens.length; i++) {
 		var token = tokens[i];
@@ -77,30 +109,41 @@ function rplParse(tokens) {
 			stack_main.push(token);
 			verification++;
 		} else if (token.type == OPER) {
+			//Pick out negative operation
+			if (token.content == '-'
+					&& (i == 0 || (tokens[i-1].type == OPER && tokens[i-1].content != ')'))) {
+				token.content = tokens[i].content = 'NEG';
+			}
+
 			if (stack_oper.length == 0 || token.content == '(' || stack_oper[stack_oper.length-1].content == '(') {
 				stack_oper.push(token);
 			} else if (token.content == ')') {
-				token_pop = undefined;
 				while (token_pop = stack_oper.pop()) {
 					if (stack_oper.length == 0) {
-						throw "Unmatched \")\" Detected";
+						throw {error:"Unmatched Bracket", token:token_pop};
 					} else if (token_pop.content == '(') {
 						break;
+					}
+
+					if (operand[token_pop.content].binocular) {
+						if (verification <= 1) {
+							throw {error:"Unexpected Operand", token:token_pop};
+						}
+						verification--;
 					}
 					stack_main.push(token_pop);
 				}
 			} else {
-				//Pick out negative operation
-				if (token.content == '-'
-						&& (i == 0 || (tokens[i-1].type == OPER && tokens[i-1].content != ')'))) {
-					token.content = 'NEG';
+				if (undefined === operand[token.content]) {
+					throw {error:"Invalid Operand", token:token};
 				}
-
-				while (stack_oper.length > 0 && priority[stack_oper[stack_oper.length-1].content] >= priority[token.content]) {
+				while (stack_oper.length > 0
+						&& stack_oper[stack_oper.length-1].content != '('
+						&& operand[stack_oper[stack_oper.length-1].content].priority >= operand[token.content].priority) {
 					token_pop = stack_oper.pop();
-					if (double_oper.indexOf(token_pop.content) >= 0) {
+					if (operand[token_pop.content].binocular) {
 						if (verification <= 1) {
-							throw "Unexpected Operand: " + token.content;
+							throw {error:"Unexpected Operand", token:token_pop};
 						}
 						verification--;
 					}
@@ -112,10 +155,10 @@ function rplParse(tokens) {
 	}
 	while (token_pop = stack_oper.pop()) {
 		if (token_pop.content == '(') {
-			throw "Unmatched \"(\" Detected";
-		} else if (double_oper.indexOf(token_pop.content) >= 0) {
+			throw {error:"Unmatched Bracket", token:token_pop};
+		} else if (operand[token_pop.content].binocular) {
 			if (verification <= 1) {
-				throw "Unexpected Operand: " + token.content;
+				throw {error:"Unexpected Operand", token:token_pop};
 			}
 			verification--;
 		}
@@ -123,18 +166,57 @@ function rplParse(tokens) {
 	}
 	return stack_main;
 }
-function rplCalc(tokens) {
-	var stack = new Array();
+function rplCalc(tokens, vars) {
+	var stack = new Array(), a, b;
 	for (var i = 0; i < tokens.length; i++) {
 		var token = tokens[i];
+		if (token.type == NUMBER) {
+			stack.push(token.content);
+		} else if (token.type == LABEL) {
+			if (undefined === vars[token.content]) {
+				stack.push(0);
+			} else {
+				stack.push(Number(vars[token.content]));
+			}
+		} else if (token.type == OPER){
+			//Calculate by opers
+			var operand_data = operand[token.content];
+			if (undefined === operand_data) {
+				throw {error:"Invalid Operand", token:token};
+			} else if (operand_data.binocular) {
+				if (stack.length <= 1) {
+					throw {error:"Syntax Error", stack:stack};
+				}
+				b = stack.pop();
+				a = stack.pop();
+				stack.push(operand_data.processor(a,b));
+			} else {
+				if (stack.length < 1) {
+					throw {error:"Syntax Error", stack:stack};
+				}
+				stack.push(operand_data.processor(stack.pop()));
+			}
+		}
 	}
 }
 
 //var expr = '3+(-3.1+4)*5+a';
-var expr = '3+(-3.1+4)*5+a';
-console.log(expr);
-console.log(lexParser(expr));
-console.log(rplParse(lexParser(expr)));
-console.log(rplParse(lexParser('3++4')));
+var util = require('util');
+var expr = '3+*(-3.1-4)*5';
+try {
+	console.log(expr);
+	console.log(rplParse(lexParser(expr)));
+	//console.log(rplCalc(rplParse(lexParser(expr))));
+} catch(e) {
+	console.log(e);
+}
+console.log(eval(expr));
+/*
+try {
+	console.log(rplParse(lexParser('3++4')));
+} catch(e) {
+	console.log(e);
+}
+*/
 //console.log(eval(expr));
 
