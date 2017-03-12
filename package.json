@@ -4,8 +4,8 @@
   "description": "Calculate expressions without using `eval()`, using LL(1) syntax analyzer.",
   "main": "",
   "scripts": {
-	"build": "uglifyjs -c -m -o exprcalc.min.js exprcalc.js",
-    "test": "node test.js"
+	"build": "uglifyjs -c -m -o JavaScript/exprcalc.min.js JavaScript/exprcalc.js",
+    "test": "node JavaScript/test.js"
   },
   "repository": {
     "type": "git",

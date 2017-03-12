@@ -16,6 +16,13 @@
 	var NUM = 1, VAR = 2, OPER = 3;
 	var lexTable = [
 		function(input) {
+			var match = /^(\-\-)/g.exec(input);
+			if (match) {
+				return null;
+			}
+			return false;
+		},
+		function(input) {
 			var match = /^0x[0-9A-Fa-f]+/g.exec(input);
 			if (match) {
 				return {type:NUM, value:match[0]};
@@ -88,15 +95,25 @@
 			}
 		},
 	};
+	var syntaxTable = {
+		'START' : ['N', 'S', '('],
+		'N' : ['B', ')', 'END'],
+		'S' : ['N', '('],
+		'B' : ['N', '(', 'S'],
+		'(' : ['S', 'N', '('],
+		')' : [')', 'B', 'END'],
+	}
 
+	var ErrorPrototype = Error.prototype;
 	var SyntaxError = function(m, token){
 		this.name = 'SyntaxError';
 		this.message = m;
 		this.stack = (new Error()).stack;
 		this.token = token;
 	}
-	SyntaxError.prototype = Object.create(Error.prototype);
-	SyntaxError.prototype.constructor = SyntaxError;
+	var SyntaxErrorPrototype = SyntaxError.prototype;
+	SyntaxErrorPrototype = Object.create(ErrorPrototype);
+	SyntaxErrorPrototype.constructor = SyntaxError;
 
 	var RPNError = function(m, token){
 		this.name = 'RPNError';
@@ -104,15 +121,18 @@
 		this.stack = (new Error()).stack;
 		this.token = token;
 	}
-	RPNError.prototype = Object.create(Error.prototype);
-	RPNError.prototype.constructor = RPNError;
+	var RPNErrorPrototype = RPNError.prototype;
+	RPNErrorPrototype = Object.create(ErrorPrototype);
+	RPNErrorPrototype.constructor = RPNError;
 
 	var lexParser = function(input){
 		var result = [], pos = 0, token;
 		while (input.length) {
 			for (var i = 0; i < lexTable.length; i++) {
 				token = lexTable[i](input);
-				if (token) {
+				if (null === token) {
+					throw new SyntaxError("Unexpected Character", pos);
+				} else if (false !== token) {
 					if (token.type !== null) {
 						token.pos = pos;
 						result.push(token);
@@ -145,14 +165,6 @@
 		return null;
 	}
 	var processTokens = function(tokens) {
-		var syntaxTable = {
-			'START' : ['N', 'S', '('],
-			'N' : ['B', ')', 'END'],
-			'S' : ['N', '(', 'S'],
-			'B' : ['N', '(', 'S'],
-			'(' : ['S', 'N', '('],
-			')' : [')', 'B', 'END'],
-		}
 		var t_last = 'START', t, stack_bracket = new Array();
 		for (var i = 0; i < tokens.length; i++) {
 			var token = tokens[i];

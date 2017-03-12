@@ -1,4 +1,6 @@
 var Calc = require('./exprcalc');
+var exprGen = require('./exprgen');
+
 var exprAll = [
 	"- 3+ - (-3.1-4)*5/-10",
 	"3+-(-3.1-4)*5 10-",
@@ -20,3 +22,12 @@ for (var i = 0; i < exprAll.length; i++) {
 	}
 }
 
+var expr = exprGen(10);
+console.log(expr);
+console.log(eval(expr));
+try {
+	console.log(calc.compile(expr).calc());
+} catch(e) {
+	console.log(e);
+	console.log(e.token);
+}
