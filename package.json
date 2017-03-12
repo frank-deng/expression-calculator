@@ -1,0 +1,28 @@
+{
+  "name": "expression-calculator",
+  "version": "0.0.1",
+  "description": "Calculate expressions without using `eval()`, using LL(1) syntax analyzer.",
+  "main": "",
+  "scripts": {
+	"build": "uglifyjs -c -m -o exprcalc.min.js exprcalc.js",
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frank-deng/expression-calculator.git"
+  },
+  "keywords": [
+    "Parser",
+    "Calc"
+  ],
+  "author": "Frank Deng",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/frank-deng/expression-calculator/issues"
+  },
+  "homepage": "https://github.com/frank-deng/expression-calculator#readme",
+  "devDependencies": {
+    "qunit-cli": "",
+    "uglify-js": ""
+  }
+}

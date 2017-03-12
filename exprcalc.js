@@ -1,14 +1,18 @@
-/* Token types */
-function CalcSyntaxError(m, token){
-	this.name = CalcSyntaxError;
-	this.message = m;
-	this.stack = (new Error()).stack;
-	this.token = token;
-}
-CalcSyntaxError.prototype = Object.create(Error.prototype);
-CalcSyntaxError.prototype.constructor = CalcSyntaxError;
-
-function Calc(){
+(function(root, factory) {
+	'use strict';
+	if (typeof define === 'function' && define.amd) {
+		// AMD support.
+		define([], factory);
+	} else if (typeof exports === 'object') {
+		// NodeJS support.
+		module.exports = factory();
+	} else {
+		// Browser global support.
+		root.Calc = factory();
+	}
+}(this, function() {
+	'use strict';
+	/* Token types */
 	var NUM = 1, VAR = 2, OPER = 3;
 	var lexTable = [
 		function(input) {
@@ -84,7 +88,26 @@ function Calc(){
 			}
 		},
 	};
-	function lexParser(input){
+
+	var SyntaxError = function(m, token){
+		this.name = 'SyntaxError';
+		this.message = m;
+		this.stack = (new Error()).stack;
+		this.token = token;
+	}
+	SyntaxError.prototype = Object.create(Error.prototype);
+	SyntaxError.prototype.constructor = SyntaxError;
+
+	var RPNError = function(m, token){
+		this.name = 'RPNError';
+		this.message = m;
+		this.stack = (new Error()).stack;
+		this.token = token;
+	}
+	RPNError.prototype = Object.create(Error.prototype);
+	RPNError.prototype.constructor = RPNError;
+
+	var lexParser = function(input){
 		var result = [], pos = 0, token;
 		while (input.length) {
 			for (var i = 0; i < lexTable.length; i++) {
@@ -100,12 +123,12 @@ function Calc(){
 				}
 			}
 			if (!token) {
-				throw new CalcSyntaxError("Unexpected Character", pos);
+				throw new SyntaxError("Unexpected Character", pos);
 			}
 		}
 		return result;
 	}
-	function getTokenType(token) {
+	var getTokenType = function(token) {
 		if (token.type == NUM || token.type == VAR) {
 			return 'N';
 		} else if (token.type == OPER) {
@@ -121,7 +144,7 @@ function Calc(){
 		}
 		return null;
 	}
-	function processTokens(tokens) {
+	var processTokens = function(tokens) {
 		var syntaxTable = {
 			'START' : ['N', 'S', '('],
 			'N' : ['B', ')', 'END'],
@@ -139,13 +162,13 @@ function Calc(){
 
 			t = getTokenType(token);
 			if (syntaxTable[t_last].indexOf(t) < 0) {
-				throw new CalcSyntaxError("Unexpected Token", token);
+				throw new SyntaxError("Unexpected Token", token);
 			}
 			if ('(' == t) {
 				stack_bracket.push(tokens[i]);
 			} else if (')' == t) {
 				if (stack_bracket.length == 0) {
-					throw new CalcSyntaxError("Unmatched Bracket", token);
+					throw new SyntaxError("Unmatched Bracket", token);
 				} else {
 					stack_bracket.pop();
 				}
@@ -153,12 +176,12 @@ function Calc(){
 			t_last = t;
 		}
 		if (syntaxTable[t_last].indexOf('END') < 0) {
-			throw new CalcSyntaxError("Unexpected End Of Expression");
+			throw new SyntaxError("Unexpected End Of Expression");
 		} else if (stack_bracket.length > 0) {
-			throw new CalcSyntaxError("Unmatched Bracket", stack_bracket[stack_bracket.length - 1]);
+			throw new SyntaxError("Unmatched Bracket", stack_bracket[stack_bracket.length - 1]);
 		}
 	}
-	function makeRPN(tokens) {
+	var makeRPN = function(tokens) {
 		var stack_main = new Array(), stack_oper = new Array();
 		var token_pop;
 
@@ -197,92 +220,99 @@ function Calc(){
 		return stack_main;
 	}
 
-	var rpnTokens = undefined;
-	this.compile = function(expr) {
-		var tokens = lexParser(expr);
-		processTokens(tokens);
-		rpnTokens = makeRPN(tokens);
-		return this;
-	}
-	this.getRPN = function(){
-		return rpnTokens;
-	}
-	this.setRPN = function(tokens){
-		rpnTokens = new Array();
-		var vstack = 0;
-		for (var i = 0; i < tokens.length; i++) {
-			var token = tokens[i];
-			if (token.type == NUM || token.type == VAR) {
-				vstack++;
-			} else if (token.type == OPER) {
-				var operand_data = operand[token.value];
-				if (undefined === operand_data) {
-					throw new CalcSyntaxError("Invalid Operand", token);
-				} else if (operand_data.binocular) {
-					if (vstack <= 1) {
-						throw new CalcSyntaxError("Unexpected Operand", token);
+	var Calc = function(){
+		var rpnTokens = undefined;
+		this.compile = function(expr) {
+			var tokens = lexParser(expr);
+			processTokens(tokens);
+			rpnTokens = makeRPN(tokens);
+			return this;
+		}
+		this.getRPN = function(){
+			return rpnTokens;
+		}
+		this.setRPN = function(tokens){
+			rpnTokens = new Array();
+			var vstack = 0;
+			for (var i = 0; i < tokens.length; i++) {
+				var token = tokens[i];
+				if (token.type == NUM) {
+					if (isNaN(token.value)) {
+						rpnTokens = undefined;
+						throw new RPNError("Invalid Number", token);
 					}
-					vstack--;
-				} else if (vstack == 0) {
-					throw new CalcSyntaxError("Unexpected Operand", token);
-				}
-			} else {
-				throw new CalcSyntaxError("Invalid Token", token);
-			}
-		}
-		if (vstack != 1) {
-			throw new CalcSyntaxError("Incomplete RPN", token);
-		}
-		return this;
-	}
-	this.calc = function(vars) {
-		if (undefined === rpnTokens) {
-			return false;
-		}
-		var stack = new Array();
-		for (var i = 0; i < rpnTokens.length; i++) {
-			var token = rpnTokens[i];
-			if (token.type == NUM) {
-				stack.push(token.value);
-			} else if (token.type == VAR) {
-				if (undefined === vars[token.value]) {
-					stack.push(0);
+					token.value = Number(token.value);
+					vstack++;
+				} else if (token.type == VAR) {
+					if ('string' != typeof(token.value)) {
+						rpnTokens = undefined;
+						throw new RPNError("Invalid Variable", token);
+					}
+					vstack++;
+				} else if (token.type == OPER) {
+					var operand_data = operand[token.value];
+					if (undefined === operand_data) {
+						rpnTokens = undefined;
+						throw new RPNError("Invalid Operand", token);
+					} else if (operand_data.binocular) {
+						if (vstack <= 1) {
+							rpnTokens = undefined;
+							throw new RPNError("Unexpected Operand", token);
+						}
+						vstack--;
+					} else if (vstack == 0) {
+						rpnTokens = undefined;
+						throw new RPNError("Unexpected Operand", token);
+					}
 				} else {
-					stack.push(Number(vars[token.value]));
+					rpnTokens = undefined;
+					throw new RPNError("Invalid Token", token);
 				}
-			} else if (token.type == OPER){
-				//Calculate by opers
-				var operand_data = operand[token.value];
-				if (operand_data.binocular) {
-					var b = stack.pop(), a = stack.pop();
-					stack.push(operand_data.processor(a,b));
-				} else {
-					stack.push(operand_data.processor(stack.pop()));
+				rpnTokens.push({type:token.type, value:token.value});
+			}
+			if (vstack != 1) {
+				rpnTokens = undefined;
+				throw new RPNError("Invalid RPN", token);
+			}
+			if (rpnTokens.length == 0) {
+				rpnTokens = undefined;
+			}
+			return this;
+		}
+		this.calc = function(vars) {
+			if (undefined === rpnTokens) {
+				return false;
+			}
+			var stack = new Array();
+			for (var i = 0; i < rpnTokens.length; i++) {
+				var token = rpnTokens[i];
+				if (token.type == NUM) {
+					stack.push(token.value);
+				} else if (token.type == VAR) {
+					if (undefined === vars[token.value]) {
+						stack.push(0);
+					} else {
+						stack.push(Number(vars[token.value]));
+					}
+				} else if (token.type == OPER){
+					//Calculate by opers
+					var operand_data = operand[token.value];
+					if (operand_data.binocular) {
+						var b = stack.pop(), a = stack.pop();
+						stack.push(operand_data.processor(a,b));
+					} else {
+						stack.push(operand_data.processor(stack.pop()));
+					}
 				}
 			}
+			return stack[0];
 		}
-		return stack[0];
-	}
-}
-
-
-var exprAll = [
-	"- 3+ - (-3.1-4)*5/-10",
-	"3+-(-3.1-4)*5 10-",
-	"3-((-4))",
-	"3-((-4))+4",
-	"3-((-4)",
-	"3-(-4))",
-];
-var calc = new Calc();
-for (var i = 0; i < exprAll.length; i++) {
-	var expr = exprAll[i];
-	console.log('>>> '+expr);
-	try {
-		console.log(calc.compile(expr).calc());
-		console.log(eval(expr));
-	} catch(e) {
-		console.log('Error: ', e);
-	}
-}
+	};
+	Calc.SyntaxError = SyntaxError;
+	Calc.RPNError = RPNError;
+	Calc.TOKEN_NUM = NUM;
+	Calc.TOKEN_VAR = VAR;
+	Calc.TOKEN_OPER = OPER;
+	return Calc;
+}));
 
