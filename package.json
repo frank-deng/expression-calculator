@@ -5,7 +5,7 @@
   "main": "",
   "scripts": {
 	"build": "uglifyjs -c -m -o JavaScript/exprcalc.min.js JavaScript/exprcalc.js",
-    "test": "node JavaScript/test.js"
+    "test": "qunit-cli -c JavaScript/exprcalc.min.js JavaScript/test.js"
   },
   "repository": {
     "type": "git",
