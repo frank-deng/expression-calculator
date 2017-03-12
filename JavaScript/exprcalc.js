@@ -13,12 +13,12 @@
 }(this, function() {
 	'use strict';
 	/* Token types */
-	var NUM = 1, VAR = 2, OPER = 3;
+	var INVALID = 0, NUM = 1, VAR = 2, OPER = 3;
 	var lexTable = [
 		function(input) {
 			var match = /^(\-\-)/g.exec(input);
 			if (match) {
-				return null;
+				return {type:INVALID};
 			}
 			return false;
 		},
@@ -130,10 +130,10 @@
 		while (input.length) {
 			for (var i = 0; i < lexTable.length; i++) {
 				token = lexTable[i](input);
-				if (null === token) {
-					throw new SyntaxError("Unexpected Character", pos);
-				} else if (false !== token) {
-					if (token.type !== null) {
+				if (false !== token) {
+					if (INVALID == token.type) {
+						throw new SyntaxError("Unexpected Character", pos);
+					} else if (token.type !== null) {
 						token.pos = pos;
 						result.push(token);
 					}

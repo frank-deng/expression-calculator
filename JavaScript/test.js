@@ -22,12 +22,20 @@ for (var i = 0; i < exprAll.length; i++) {
 	}
 }
 
-var expr = exprGen(10);
-console.log(expr);
-console.log(eval(expr));
-try {
-	console.log(calc.compile(expr).calc());
-} catch(e) {
-	console.log(e);
-	console.log(e.token);
+var count = 100;
+while (count--){
+	var expr = exprGen(20);
+	try {
+		var r0 = calc.compile(expr).calc();
+		var r1 = eval(expr);
+		if (r0 != r1) {
+			console.log('Error', expr, r0, r1);
+		} else {
+			console.log(expr, r0);
+		}
+	} catch(e) {
+		console.log(e);
+		console.log(e.token);
+	}
 }
+

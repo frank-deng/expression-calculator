@@ -45,7 +45,7 @@
 					}
 				break;
 				case 'N':
-					result += String((Math.random()*200-100).toFixed(3));
+					result += String((Math.random()*200).toFixed(3));
 				break;
 				case 'S':
 					result += '-';
