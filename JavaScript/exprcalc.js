@@ -34,7 +34,7 @@
 			return false;
 		},
 		function(input) {
-			var match = /^[A-Za-z_\u0080-\uffff][A-Za-z0-9_\-\u0080-\uffff]*/g.exec(input);
+			var match = /^[A-Za-z_\u0080-\uffff][A-Za-z0-9_\u0080-\uffff]*/g.exec(input);
 			if (match) {
 				return {type:VAR, value:match[0]};
 			}
@@ -81,9 +81,6 @@
 			binocular: true,
 			priority: 20,
 			processor: function(a, b) {
-				if (b == 0) {
-					throw 'Division By Zero';
-				}
 				return a/b;
 			}
 		},
@@ -105,6 +102,7 @@
 	}
 
 	var ErrorPrototype = Error.prototype;
+
 	var SyntaxError = function(m, token){
 		this.name = 'SyntaxError';
 		this.message = m;
@@ -301,7 +299,7 @@
 				if (token.type == NUM) {
 					stack.push(token.value);
 				} else if (token.type == VAR) {
-					if (undefined === vars[token.value]) {
+					if (undefined === vars || isNaN(vars[token.value])) {
 						stack.push(0);
 					} else {
 						stack.push(Number(vars[token.value]));

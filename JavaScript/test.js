@@ -13,6 +13,12 @@ QUnit.test("Compile Multiple Exprs", function(assert) {
 	assert.strictEqual(calc.compile('3-((-4))').calc(), 7);
 	assert.strictEqual(calc.compile('3-((-4))+4').calc(), 11);
 });
+QUnit.test("Zero Division", function(assert) {
+	var calc = new Calc();
+	assert.strictEqual(calc.compile('3/0').calc(), Infinity);
+	assert.strictEqual(calc.compile('3/(1-1)*2').calc(), Infinity);
+	assert.strictEqual(calc.compile('-3/(1-1)').calc(), -Infinity);
+});
 QUnit.test("RPN Output", function(assert) {
 	var calc = new Calc();
 	assert.deepEqual(calc.compile('1+1').getRPN(), [
@@ -174,6 +180,47 @@ QUnit.test("RPN Input", function(assert) {
 	calc.setRPN(rpn);
 	assert.deepEqual(calc.getRPN(), rpn);
 	assert.strictEqual(calc.calc(), 11);
+});
+QUnit.test("Applying Variables", function(assert) {
+	var rpn, calc = new Calc();
+
+	calc.compile('a*b');
+	assert.deepEqual(calc.getRPN(), [
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_OPER, value:'*'},
+	]);
+	assert.strictEqual(calc.calc(), 0);
+	assert.strictEqual(calc.calc({a:12,b:3}), 36);
+
+	calc.compile('a-b');
+	assert.deepEqual(calc.getRPN(), [
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_OPER, value:'-'},
+	]);
+	assert.strictEqual(calc.calc({a:12,b:3}), 9);
+	assert.strictEqual(calc.calc({a:12}), 12);
+	assert.strictEqual(calc.calc({b:3}), -3);
+
+	rpn = [
+		{type:Calc.TOKEN_VAR, value:'c'},
+		{type:Calc.TOKEN_VAR, value:'d'},
+		{type:Calc.TOKEN_OPER, value:'-'},
+	];
+	calc.setRPN(rpn);
+	assert.deepEqual(calc.getRPN(), rpn);
+	assert.strictEqual(calc.calc(), 0);
+	assert.strictEqual(calc.calc({c:1}), 1);
+	assert.strictEqual(calc.calc({d:2}), -2);
+	assert.strictEqual(calc.calc({c:1, d:2}), -1);
+});
+QUnit.test("Variables With Malformed Value", function(assert) {
+	var calc = new Calc();
+	calc.compile('a-b');
+	assert.strictEqual(calc.calc({a:'ads', b:'<script>alert(2048)</script>', c:21}), 0);
+	assert.strictEqual(calc.calc({a:12, b:'sd'}), 12);
+	assert.strictEqual(calc.calc({a:undefined, b:3}), -3);
 });
 QUnit.test("Random Expression", function(assert) {
 	var calc = new Calc(), count = 100;

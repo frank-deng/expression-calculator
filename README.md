@@ -1,5 +1,7 @@
 expression-calculator
 =====================
 
-Calculate expressions without using `eval()`, using LL(1) syntax analyzer.
+A simple expression parser, using LL(1) syntax analyzer.
+
+Useful to parse and calculate expression without using `eval()`, so as to avoid all the security risks caused by `eval()`.
 
