@@ -229,13 +229,48 @@
 		}
 		return stack_main;
 	}
+	var compressRPN = function(tokens) {
+		var stack = new Array();
+		for (var i = 0; i < tokens.length; i++) {
+			var token = tokens[i];
+			if (token.type == OPER) {
+				//Calculate by opers
+				var operand_data = operand[token.value];
+				if (operand_data.binocular
+					&& stack.length > 1
+					&& stack[stack.length-1].type == NUM
+					&& stack[stack.length-2].type == NUM) {
+					var b = stack.pop().value, a = stack.pop().value;
+					stack.push({
+						type: NUM,
+						value: operand_data.processor(a,b),
+					});
+				} else if (!operand_data.binocular
+					&& stack.length > 0
+					&& stack[stack.length-1].type == NUM) {
+					stack.push({
+						type: NUM,
+						value: operand_data.processor(stack.pop().value),
+					});
+				} else {
+					stack.push(token);
+				}
+			} else {
+				stack.push(token);
+			}
+		}
+		return stack;
+	}
 
 	var Calc = function(){
 		var rpnTokens = undefined;
-		this.compile = function(expr) {
+		this.compile = function(expr, compress) {
 			var tokens = lexParser(expr);
 			processTokens(tokens);
 			rpnTokens = makeRPN(tokens);
+			if (compress) {
+				rpnTokens = compressRPN(rpnTokens);
+			}
 			return this;
 		}
 		this.getRPN = function(){

@@ -1,5 +1,6 @@
 var Calc = require('./exprcalc.min');
 var exprGen = require('./exprgen');
+
 QUnit.test("Basic Test", function(assert) {
 	assert.strictEqual((new Calc()).compile('1+1').calc(), 2);
 	assert.strictEqual((new Calc()).compile('- 3+ - (-3.1-4)*5/-10').calc(), -6.55);
@@ -221,6 +222,32 @@ QUnit.test("Variables With Malformed Value", function(assert) {
 	assert.strictEqual(calc.calc({a:'ads', b:'<script>alert(2048)</script>', c:21}), 0);
 	assert.strictEqual(calc.calc({a:12, b:'sd'}), 12);
 	assert.strictEqual(calc.calc({a:undefined, b:3}), -3);
+});
+QUnit.test("RPN Compression", function(assert) {
+	var calc = new Calc();
+	calc.compile('(3+4)*(a+b)', true);
+	assert.deepEqual(calc.getRPN(), [
+		{type: Calc.TOKEN_NUM, value: 7},
+		{type: Calc.TOKEN_VAR, value: 'a'},
+		{type: Calc.TOKEN_VAR, value: 'b'},
+		{type: Calc.TOKEN_OPER, value: '+'},
+		{type: Calc.TOKEN_OPER, value: '*'},
+	]);
+	assert.strictEqual(calc.calc({a:2, b:3}), 35);
+	assert.strictEqual(calc.compile('(3+4)*(a+b)').calc({a:2, b:3}), 35);
+
+	calc.compile('(3+4)*(a+b)/(-(-5-6))', true);
+	assert.deepEqual(calc.getRPN(), [
+		{type: Calc.TOKEN_NUM, value: 7},
+		{type: Calc.TOKEN_VAR, value: 'a'},
+		{type: Calc.TOKEN_VAR, value: 'b'},
+		{type: Calc.TOKEN_OPER, value: '+'},
+		{type: Calc.TOKEN_OPER, value: '*'},
+		{type: Calc.TOKEN_NUM, value: 11},
+		{type: Calc.TOKEN_OPER, value: '/'},
+	]);
+	assert.strictEqual(calc.calc({a:2, b:3}), 35/11);
+	assert.strictEqual(calc.compile('(3+4)*(a+b)/(-(-5-6))').calc({a:2, b:3}), 35/11);
 });
 QUnit.test("Random Expression", function(assert) {
 	var calc = new Calc(), count = 100;

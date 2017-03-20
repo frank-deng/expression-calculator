@@ -1,11 +1,11 @@
 {
   "name": "expression-calculator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Calculate expressions without using `eval()`, using LL(1) syntax analyzer.",
   "main": "",
   "scripts": {
-	"build": "uglifyjs -c -m -o JavaScript/exprcalc.min.js JavaScript/exprcalc.js",
-    "test": "qunit-cli -c JavaScript/exprcalc.min.js JavaScript/test.js"
+	"build": "uglifyjs -c -m -o exprcalc.min.js exprcalc.js",
+    "test": "qunit-cli -c exprcalc.min.js test.js"
   },
   "repository": {
     "type": "git",
@@ -26,3 +26,4 @@
     "uglify-js": ""
   }
 }
+
