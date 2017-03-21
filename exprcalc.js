@@ -191,9 +191,36 @@
 			throw new SyntaxError("Unmatched Bracket", stack_bracket[stack_bracket.length - 1]);
 		}
 	}
-	var makeRPN = function(tokens) {
+	var makeRPN = function(tokens, debug) {
 		var stack_main = new Array(), stack_oper = new Array();
 		var token_pop;
+
+		var compressRPN = function(token, debug){
+			if (debug) {
+				stack_main.push(token);
+				return;
+			}
+			var operand_data = operand[token.value];
+			if (operand_data.binocular
+				&& stack_main.length > 1
+				&& stack_main[stack_main.length-1].type == NUM
+				&& stack_main[stack_main.length-2].type == NUM) {
+				var b = stack_main.pop().value, a = stack_main.pop().value;
+				stack_main.push({
+					type: NUM,
+					value: operand_data.processor(a,b),
+				});
+			} else if (!operand_data.binocular
+				&& stack_main.length > 0
+				&& stack_main[stack_main.length-1].type == NUM) {
+				stack_main.push({
+					type: NUM,
+					value: operand_data.processor(stack_main.pop().value),
+				});
+			} else {
+				stack_main.push(token);
+			}
+		}
 
 		for (var i = 0; i < tokens.length; i++) {
 			var token = tokens[i];
@@ -212,65 +239,30 @@
 						if (token_pop.value == '(') {
 							break;
 						}
-						stack_main.push(token_pop);
+						compressRPN(token_pop, debug);
 					}
 				} else {
 					while (stack_oper.length > 0
 							&& stack_oper[stack_oper.length-1].value != '('
 							&& operand[stack_oper[stack_oper.length-1].value].priority >= operand[token.value].priority) {
-						stack_main.push(stack_oper.pop());
+						compressRPN(stack_oper.pop(), debug);
 					}
 					stack_oper.push(token);
 				}
 			}
 		}
 		while (token_pop = stack_oper.pop()) {
-			stack_main.push(token_pop);
+			compressRPN(token_pop, debug);
 		}
 		return stack_main;
-	}
-	var compressRPN = function(tokens) {
-		var stack = new Array();
-		for (var i = 0; i < tokens.length; i++) {
-			var token = tokens[i];
-			if (token.type == OPER) {
-				//Calculate by opers
-				var operand_data = operand[token.value];
-				if (operand_data.binocular
-					&& stack.length > 1
-					&& stack[stack.length-1].type == NUM
-					&& stack[stack.length-2].type == NUM) {
-					var b = stack.pop().value, a = stack.pop().value;
-					stack.push({
-						type: NUM,
-						value: operand_data.processor(a,b),
-					});
-				} else if (!operand_data.binocular
-					&& stack.length > 0
-					&& stack[stack.length-1].type == NUM) {
-					stack.push({
-						type: NUM,
-						value: operand_data.processor(stack.pop().value),
-					});
-				} else {
-					stack.push(token);
-				}
-			} else {
-				stack.push(token);
-			}
-		}
-		return stack;
 	}
 
 	var Calc = function(){
 		var rpnTokens = undefined;
-		this.compile = function(expr, compress) {
+		this.compile = function(expr, debug) {
 			var tokens = lexParser(expr);
 			processTokens(tokens);
-			rpnTokens = makeRPN(tokens);
-			if (compress) {
-				rpnTokens = compressRPN(rpnTokens);
-			}
+			rpnTokens = makeRPN(tokens, debug);
 			return this;
 		}
 		this.getRPN = function(){
@@ -325,9 +317,12 @@
 			return this;
 		}
 		this.calc = function(vars) {
-			if (undefined === rpnTokens) {
+			if (undefined === rpnTokens || rpnTokens.length == 0) {
 				return false;
+			} else if (rpnTokens.length == 1 && rpnTokens[0].type == NUM) {
+				return rpnTokens[0].value;
 			}
+
 			var stack = new Array();
 			for (var i = 0; i < rpnTokens.length; i++) {
 				var token = rpnTokens[i];

@@ -16,14 +16,14 @@ Initialize an instance of `Calc()`.
 	
 ### Methods
 
-#### `compile(expr,compress)`
+#### `compile(expr,debug)`
 
 Compile an expression into an RPN expression.
 
 **Parameters**
 
 * `expr` - Expression to compile in string.
-* `Compress` - Compress RPN for fast calculation, default is `false`.
+* `debug` - Compression of RPN will not be done if `true`, useful for debugging, default is `false`.
 
 **Returns**
 
@@ -32,14 +32,19 @@ A reference to this instance.
 **Throws**
 
 * `Calc.SyntaxError` - If the given expression contains error.
+
 	
 #### `calc(vars)`
 	
 Calculate the previously compiled expression.
 
+The compiled expression may contain variables, with default value 0.
+
+You may use a key-value dict to specify values for variables in the expression. Variable names are case sensitive.
+
 **Parameters**
 
-* `vars` - A dict contains key-value pairs where keys for variable name and values for the numeric values for variables in the expression. Variables are case sensitive.
+* `vars` - A dict contains key-value pairs (Optional).
 
 **Returns**
 
@@ -47,15 +52,10 @@ The calculation result, or `false` if no RPN is loaded or compiled from expressi
 
 **Example**
 
-Compile expression:
-
 	var calc = new Calc();
-	calc.compile('3+4-a');
+	calc.compile('3+4').calc(); //Result: 7
+	calc.compile('3+4-a').calc({a:-10}); //Result: 17
 
-Compile expression with the final RPN compressed:
-
-	var calc = new Calc();
-	calc.compile('3+4-a', true);
 
 #### `getRPN()`
 
@@ -63,28 +63,46 @@ Get the compiled RPN expression.
 
 **Returns**
 
-Returns the compiled RPN, or `undefined` if no RPN is loaded or compiled from expression.
+Returns the compiled RPN which can be converted into JSON, or `undefined` if no RPN is loaded or compiled.
 
 **Example**
 
 	var calc = new Calc();
 	calc.compile('3*(5+a)').getRPN();
 
-The code above will get the following data:
+The code above will get the following JSON data:
 
 	[
 		{type:1, value:3},
 		{type:1, value:5},
 		{type:2, value:"a"},
 		{type:3, value:"+"},
-		{type:3, value:"*"},
+		{type:3, value:"*"}
 	]
 	
 In the expression above, each token's type value has an alias, you may refer to **Aliases** section for detail.
 
+You may also use it to check if the input expression is valid:
+
+	var calc = new Calc();
+	function checkExpr(expr) {
+		try {
+			var rpn = calc.compile(expr).getRPN();
+			for (var i = 0; i < rpn.length; i++) {
+				if (rpn[i].type == VAR) {
+					return false;
+				}
+			}
+		} catch(e) {
+			return false;
+		}
+		return true;
+	}
+
+
 #### `setRPN(expr)`
 
-Load compiled RPN.
+Load previously compiled RPN from other source like database or memcache/redis.
 
 **Parameters**
 
@@ -97,6 +115,7 @@ A reference to this instance.
 **Throws**
 
 * `Calc.RPNError` - If the given RPN contains invalid tokens or errors.
+
 
 ### Aliases
 
@@ -111,3 +130,4 @@ Mark tokens of variable type.
 #### `Calc.TOKEN_OPER`
 
 Mark tokens of operand type.
+
