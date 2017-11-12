@@ -1,4 +1,5 @@
 var Calc = require('./exprcalc.min');
+var RPNUtil = require('./rpnutil.js');
 var exprGen = require('./exprgen');
 
 QUnit.test("Basic Test", function(assert) {
@@ -266,4 +267,29 @@ QUnit.test("Random Expression", function(assert) {
 		assert.strictEqual(calc.compile(expr).calc(), eval(expr), expr);
 	}
 });
-
+QUnit.test("Convert RPN to binary tree", function(assert){
+	assert.deepEqual(RPNUtil.getBinaryTree([
+		{type:Calc.TOKEN_VAR, value:'c'},
+		{type:Calc.TOKEN_VAR, value:'d'},
+		{type:Calc.TOKEN_OPER, value:'-'},
+	]), {
+		node:'-',
+		left:'c',
+		right:'d'
+	});
+	var calc = new Calc();
+	assert.deepEqual(RPNUtil.getBinaryTree(calc.compile('c-d').getRPN()), {
+		node:'-',
+		left:'c',
+		right:'d'
+	});
+	assert.deepEqual(RPNUtil.getBinaryTree(calc.compile('(a+b)*c').getRPN()), {
+		node:'*',
+		left:{
+			node:'+',
+			left:'a',
+			right:'b',
+		},
+		right:'c'
+	});
+});
