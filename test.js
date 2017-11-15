@@ -1,5 +1,4 @@
 var Calc = require('./exprcalc.min');
-var RPNUtil = require('./rpnutil.js');
 var exprGen = require('./exprgen');
 
 QUnit.test("Basic Test", function(assert) {
@@ -268,28 +267,54 @@ QUnit.test("Random Expression", function(assert) {
 	}
 });
 QUnit.test("Convert RPN to binary tree", function(assert){
-	assert.deepEqual(RPNUtil.getBinaryTree([
-		{type:Calc.TOKEN_VAR, value:'c'},
-		{type:Calc.TOKEN_VAR, value:'d'},
+	assert.strictEqual(Calc.rpn2Expr([
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_OPER, value:'+'},
+	]), 'a+b');
+	assert.strictEqual(Calc.rpn2Expr([
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_VAR, value:'3'},
 		{type:Calc.TOKEN_OPER, value:'-'},
-	]), {
-		node:'-',
-		left:'c',
-		right:'d'
-	});
+	]), 'a-3');
+	assert.strictEqual(Calc.rpn2Expr([
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_VAR, value:'c'},
+		{type:Calc.TOKEN_OPER, value:'*'},
+		{type:Calc.TOKEN_OPER, value:'+'},
+	]), 'a+b*c');
+	assert.strictEqual(Calc.rpn2Expr([
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_VAR, value:'c'},
+		{type:Calc.TOKEN_OPER, value:'+'},
+		{type:Calc.TOKEN_OPER, value:'*'},
+	]), 'a*(b+c)');
+	assert.strictEqual(Calc.rpn2Expr([
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_OPER, value:'+'},
+		{type:Calc.TOKEN_VAR, value:'c'},
+		{type:Calc.TOKEN_OPER, value:'*'},
+	]), '(a+b)*c');
+	assert.strictEqual(Calc.rpn2Expr([
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_OPER, value:'NEG'},
+		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_OPER, value:'NEG'},
+		{type:Calc.TOKEN_OPER, value:'+'},
+		{type:Calc.TOKEN_OPER, value:'NEG'},
+		{type:Calc.TOKEN_VAR, value:'c'},
+		{type:Calc.TOKEN_OPER, value:'*'},
+	]), '(-((-a)+(-b)))*c');
 	var calc = new Calc();
-	assert.deepEqual(RPNUtil.getBinaryTree(calc.compile('c-d').getRPN()), {
-		node:'-',
-		left:'c',
-		right:'d'
-	});
-	assert.deepEqual(RPNUtil.getBinaryTree(calc.compile('(a+b)*c').getRPN()), {
-		node:'*',
-		left:{
-			node:'+',
-			left:'a',
-			right:'b',
-		},
-		right:'c'
-	});
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('d+c').getRPN()), 'c+d');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('(b+a)*c').getRPN()), '(a+b)*c');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('(b-a)*c').getRPN()), '(b-a)*c');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('(c-d)*(b+a)').getRPN()), '(a+b)*(c-d)');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('d*c+b*a').getRPN()), 'a*b+c*d');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('d*c-b*a').getRPN()), 'c*d-a*b');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('(d*c-b)*a').getRPN()), 'a*(c*d-b)');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('b*a-(d*c-b)').getRPN()), 'b*a-(c*d-b)');
 });

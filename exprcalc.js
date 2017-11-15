@@ -59,6 +59,7 @@
 		'+': {
 			binocular: true,
 			priority: 10,
+			exchangeable: true,
 			processor: function(a, b) {
 				return a+b;
 			}
@@ -66,6 +67,7 @@
 		'-': {
 			binocular: true,
 			priority: 10,
+			exchangeable: false,
 			processor: function(a, b) {
 				return a-b;
 			}
@@ -73,6 +75,7 @@
 		'*': {
 			binocular: true,
 			priority: 20,
+			exchangeable: true,
 			processor: function(a, b) {
 				return a*b;
 			}
@@ -80,6 +83,7 @@
 		'/': {
 			binocular: true,
 			priority: 20,
+			exchangeable: false,
 			processor: function(a, b) {
 				return a/b;
 			}
@@ -348,11 +352,52 @@
 			return stack[0];
 		}
 	};
-	Calc.SyntaxError = SyntaxError;
-	Calc.RPNError = RPNError;
-	Calc.TOKEN_NUM = NUM;
-	Calc.TOKEN_VAR = VAR;
-	Calc.TOKEN_OPER = OPER;
+	var cp = Calc;
+	cp.SyntaxError = SyntaxError;
+	cp.RPNError = RPNError;
+	cp.TOKEN_NUM = NUM;
+	cp.TOKEN_VAR = VAR;
+	cp.TOKEN_OPER = OPER;
+
+	//Convert RPN to expression
+	cp.rpn2Expr = function(rpn){
+		var processNum = function(stack, n){
+			stack.push({value:n, priority:undefined});
+		}
+		var processOper = function(stack, oper){
+			var operData = operand[oper];
+			if (operData.binocular) {
+				var b = stack.pop(), a = stack.pop(), temp;
+				if (operData.exchangeable && String(a.value) > String(b.value)) {
+					temp = a; a = b; b = temp;
+				}
+				var value = (a.priority < operData.priority ? '('+a.value+')' : a.value);
+				value += oper;
+				value += (b.priority < operData.priority ? '('+b.value+')' : b.value);
+				stack.push({
+					value:value,
+					priority:operData.priority,
+				});
+			} else {
+				if ('NEG' == oper) {
+					var node = stack[stack.length-1];
+					node.value = (node.priority === undefined ? '-'+node.value : '-('+node.value+')');
+					node.priority = 0;
+				}
+			}
+		}
+
+		var stack = new Array();
+		for (var i = 0; i < rpn.length; i++) {
+			var token = rpn[i];
+			if (token.type == NUM || token.type == VAR) {
+				processNum(stack, token.value)
+			} else if (token.type == OPER){
+				processOper(stack, token.value);
+			}
+		}
+		return stack[0].value;
+	}
 	return Calc;
 }));
 
