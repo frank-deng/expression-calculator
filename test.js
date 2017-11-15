@@ -326,7 +326,7 @@ QUnit.test("Convert RPN to Expression - Random Expression Test", function(assert
 		var expr2 = Calc.rpn2Expr(calc.compile(expr, true).getRPN());
 		var r0 = eval(expr), r1 = eval(expr2);
 		assert.ok(function(){
-			return (expr != expr2) &&Math.abs(r1 - r0) < 0.0000001;
+			return (expr != expr2) && Math.abs(r1 - r0) < 0.0000001;
 		}, expr+' : '+expr2);
 	}
 });
