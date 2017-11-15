@@ -362,30 +362,99 @@
 	//Convert RPN to expression
 	cp.rpn2Expr = function(rpn){
 		var processNum = function(stack, n){
-			stack.push({value:n, priority:undefined});
+			stack.push({value:n, priority:100});
 		}
 		var processOper = function(stack, oper){
+			var revAddMinus = function(e){
+				var arr = e.split('');
+				var bracket = 0;
+				for (var i = 0; i < arr.length; i++) {
+					switch (e[i]) {
+						case '+':
+							if (0 == bracket) {
+								arr[i] = '-';
+							}
+						break;
+						case '-':
+							if (0 == bracket) {
+								arr[i] = '+';
+							}
+						break;
+						case '(':
+							bracket++;
+						break;
+						case ')':
+							bracket--;
+						break;
+					}
+				}
+				return arr.join('');
+			}
+			var revMulDiv = function(e){
+				var arr = e.split('');
+				var bracket = 0;
+				for (var i = 0; i < arr.length; i++) {
+					switch (e[i]) {
+						case '*':
+							if (0 == bracket) {
+								arr[i] = '/';
+							}
+						break;
+						case '/':
+							if (0 == bracket) {
+								arr[i] = '*';
+							}
+						break;
+						case '(':
+							bracket++;
+						break;
+						case ')':
+							bracket--;
+						break;
+					}
+				}
+				return arr.join('');
+			}
 			var operData = operand[oper];
 			if (operData.binocular) {
 				var b = stack.pop(), a = stack.pop(), temp;
 				if (operData.exchangeable && String(a.value) > String(b.value)) {
 					temp = a; a = b; b = temp;
 				}
-				var value = (a.priority < operData.priority ? '('+a.value+')' : a.value);
-				value += oper;
-				value += (b.priority < operData.priority ? '('+b.value+')' : b.value);
+				if (a.priority < operData.priority) {
+					a.value = '('+a.value+')';
+				}
+				var value = a.value + oper;
+				if (b.priority > operData.priority) {
+					value += b.value;
+				} else if (b.priority < operData.priority) {
+					b.value = '('+b.value+')';
+					value += b.value;
+				} else {
+					switch(oper) {
+						case '-':
+							value += revAddMinus(b.value);
+						break;
+						case '/':
+							value += revMulDiv(b.value);
+						break;
+						default:
+							value += b.value;
+						break;
+					}
+				}
 				stack.push({
 					value:value,
 					priority:operData.priority,
 				});
 			} else {
+				var node = stack[stack.length-1];
 				if ('NEG' == oper) {
-					var node = stack[stack.length-1];
-					node.value = (node.priority === undefined ? '-'+node.value : '-('+node.value+')');
-					node.priority = 0;
+					node.value = (node.priority == 100 ? '-'+node.value : '-('+node.value+')');
 				}
+				node.priority = 0;
 			}
-		}
+		};
 
 		var stack = new Array();
 		for (var i = 0; i < rpn.length; i++) {

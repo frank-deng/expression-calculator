@@ -260,13 +260,13 @@ QUnit.test("Variables With Malformed Value", function(assert) {
 	assert.strictEqual(calc.calc({a:undefined, b:3}), -3);
 });
 QUnit.test("Random Expression", function(assert) {
-	var calc = new Calc(), count = 100;
+	var calc = new Calc(), count = 1000;
 	while (count--){
-		var expr = exprGen(20);
+		var expr = exprGen(3+(Math.random()*40).toFixed(0));
 		assert.strictEqual(calc.compile(expr).calc(), eval(expr), expr);
 	}
 });
-QUnit.test("Convert RPN to binary tree", function(assert){
+QUnit.test("Convert RPN to Expression", function(assert){
 	assert.strictEqual(Calc.rpn2Expr([
 		{type:Calc.TOKEN_VAR, value:'a'},
 		{type:Calc.TOKEN_VAR, value:'b'},
@@ -316,5 +316,18 @@ QUnit.test("Convert RPN to binary tree", function(assert){
 	assert.strictEqual(Calc.rpn2Expr(calc.compile('d*c+b*a').getRPN()), 'a*b+c*d');
 	assert.strictEqual(Calc.rpn2Expr(calc.compile('d*c-b*a').getRPN()), 'c*d-a*b');
 	assert.strictEqual(Calc.rpn2Expr(calc.compile('(d*c-b)*a').getRPN()), 'a*(c*d-b)');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('b*a-(d*c-b)').getRPN()), 'b*a-(c*d-b)');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('b*a-(d*c+a-b)').getRPN()), 'a*b-a-c*d+b');
+	assert.strictEqual(Calc.rpn2Expr(calc.compile('d/(c/b)+b/a').getRPN()), 'b/a+d/c*b');
 });
+QUnit.test("Convert RPN to Expression - Random Expression Test", function(assert){
+	var calc = new Calc(), count = 1000;
+	while (count--){
+		var expr = exprGen(3+(Math.random()*40).toFixed(0));
+		var expr2 = Calc.rpn2Expr(calc.compile(expr, true).getRPN());
+		var r0 = eval(expr), r1 = eval(expr2);
+		assert.ok(function(){
+			return Math.abs(r1 - r0) < 0.0000001;
+		}, expr+' : '+expr2);
+	}
+});
+
