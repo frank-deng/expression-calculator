@@ -23,7 +23,7 @@ Compile an expression into an RPN expression.
 **Parameters**
 
 * `expr` - Expression to compile in string.
-* `debug` - Compression of RPN will not be done if `true`, useful for debugging, default is `false`.
+* `debug` - Compression of RPN will not be made if `true`, useful for debugging, default is `false`.
 
 **Returns**
 
@@ -117,17 +117,41 @@ A reference to this instance.
 * `Calc.RPNError` - If the given RPN contains invalid tokens or errors.
 
 
+#### `getSimplifiedExpr()`
+
+Get a simplified expression from the RPN compiled from an expression or loaded externally.
+
+**Returns**
+
+String of the simplified expression.
+
+**Example**
+
+	var calc = new Calc();
+	var expr = calc.setRPN([
+		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_VAR, value:'c'},
+		{type:Calc.TOKEN_OPER, value:'+'},
+		{type:Calc.TOKEN_VAR, value:'a'},
+		{type:Calc.TOKEN_OPER, value:'*'},
+	]).getSimplifiedExpr();
+	//expr = 'a*(b+c)'
+	
+	var expr = calc.compile('((c-d))*(b+a)').getSimplifiedExpr();
+	//expr = '(a+b)*(c-d)'
+
+
 ### Aliases
 
 #### `Calc.TOKEN_NUM`
 
-Mark tokens of number type.
+Mark RPN tokens of number type.
 
 #### `Calc.TOKEN_VAR`
 
-Mark tokens of variable type.
+Mark RPN tokens of variable type.
 
 #### `Calc.TOKEN_OPER`
 
-Mark tokens of operand type.
+Mark RPN tokens of operand type.
 

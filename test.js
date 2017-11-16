@@ -267,38 +267,39 @@ QUnit.test("Random Expression", function(assert) {
 	}
 });
 QUnit.test("Convert RPN to Expression", function(assert){
-	assert.strictEqual(Calc.rpn2Expr([
-		{type:Calc.TOKEN_VAR, value:'a'},
+	var calc = new Calc();
+	assert.strictEqual(calc.setRPN([
 		{type:Calc.TOKEN_VAR, value:'b'},
+		{type:Calc.TOKEN_VAR, value:'a'},
 		{type:Calc.TOKEN_OPER, value:'+'},
-	]), 'a+b');
-	assert.strictEqual(Calc.rpn2Expr([
+	]).getSimplifiedExpr(), 'a+b');
+	assert.strictEqual(calc.setRPN([
 		{type:Calc.TOKEN_VAR, value:'a'},
 		{type:Calc.TOKEN_VAR, value:'3'},
 		{type:Calc.TOKEN_OPER, value:'-'},
-	]), 'a-3');
-	assert.strictEqual(Calc.rpn2Expr([
+	]).getSimplifiedExpr(), 'a-3');
+	assert.strictEqual(calc.setRPN([
 		{type:Calc.TOKEN_VAR, value:'a'},
 		{type:Calc.TOKEN_VAR, value:'b'},
 		{type:Calc.TOKEN_VAR, value:'c'},
 		{type:Calc.TOKEN_OPER, value:'*'},
 		{type:Calc.TOKEN_OPER, value:'+'},
-	]), 'a+b*c');
-	assert.strictEqual(Calc.rpn2Expr([
-		{type:Calc.TOKEN_VAR, value:'a'},
+	]).getSimplifiedExpr(), 'a+b*c');
+	assert.strictEqual(calc.setRPN([
 		{type:Calc.TOKEN_VAR, value:'b'},
 		{type:Calc.TOKEN_VAR, value:'c'},
 		{type:Calc.TOKEN_OPER, value:'+'},
+		{type:Calc.TOKEN_VAR, value:'a'},
 		{type:Calc.TOKEN_OPER, value:'*'},
-	]), 'a*(b+c)');
-	assert.strictEqual(Calc.rpn2Expr([
+	]).getSimplifiedExpr(), 'a*(b+c)');
+	assert.strictEqual(calc.setRPN([
 		{type:Calc.TOKEN_VAR, value:'a'},
 		{type:Calc.TOKEN_VAR, value:'b'},
 		{type:Calc.TOKEN_OPER, value:'+'},
 		{type:Calc.TOKEN_VAR, value:'c'},
 		{type:Calc.TOKEN_OPER, value:'*'},
-	]), '(a+b)*c');
-	assert.strictEqual(Calc.rpn2Expr([
+	]).getSimplifiedExpr(), '(a+b)*c');
+	assert.strictEqual(calc.setRPN([
 		{type:Calc.TOKEN_VAR, value:'a'},
 		{type:Calc.TOKEN_OPER, value:'NEG'},
 		{type:Calc.TOKEN_VAR, value:'b'},
@@ -307,23 +308,22 @@ QUnit.test("Convert RPN to Expression", function(assert){
 		{type:Calc.TOKEN_OPER, value:'NEG'},
 		{type:Calc.TOKEN_VAR, value:'c'},
 		{type:Calc.TOKEN_OPER, value:'*'},
-	]), '(-((-a)+(-b)))*c');
-	var calc = new Calc();
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('d+c').getRPN()), 'c+d');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('(b+a)*c').getRPN()), '(a+b)*c');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('(b-a)*c').getRPN()), '(b-a)*c');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('(c-d)*(b+a)').getRPN()), '(a+b)*(c-d)');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('d*c+b*a').getRPN()), 'a*b+c*d');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('d*c-b*a').getRPN()), 'c*d-a*b');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('(d*c-b)*a').getRPN()), 'a*(c*d-b)');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('b*a-(d*c+a-b)').getRPN()), 'a*b-a-c*d+b');
-	assert.strictEqual(Calc.rpn2Expr(calc.compile('d/(c/b)+b/a').getRPN()), 'b/a+d/c*b');
+	]).getSimplifiedExpr(), '(-((-a)+(-b)))*c');
+	assert.strictEqual(calc.compile('d+c').getSimplifiedExpr(), 'c+d');
+	assert.strictEqual(calc.compile('(b+a)*c').getSimplifiedExpr(), '(a+b)*c');
+	assert.strictEqual(calc.compile('(b-a)*c').getSimplifiedExpr(), '(b-a)*c');
+	assert.strictEqual(calc.compile('((c-d))*(b+a)').getSimplifiedExpr(), '(a+b)*(c-d)');
+	assert.strictEqual(calc.compile('d*c+b*a').getSimplifiedExpr(), 'a*b+c*d');
+	assert.strictEqual(calc.compile('d*c-b*a').getSimplifiedExpr(), 'c*d-a*b');
+	assert.strictEqual(calc.compile('(d*c-b)*a').getSimplifiedExpr(), 'a*(c*d-b)');
+	assert.strictEqual(calc.compile('b*a-(d*c+a-b)').getSimplifiedExpr(), 'a*b-a-c*d+b');
+	assert.strictEqual(calc.compile('d/(c/b)+b/a').getSimplifiedExpr(), 'b/a+d/c*b');
 });
 QUnit.test("Convert RPN to Expression - Random Expression Test", function(assert){
 	var calc = new Calc(), count = 1000;
 	while (count--){
 		var expr = exprGen(3+(Math.random()*40).toFixed(0));
-		var expr2 = Calc.rpn2Expr(calc.compile(expr, true).getRPN());
+		var expr2 = calc.compile(expr, true).getSimplifiedExpr();
 		var r0 = eval(expr), r1 = eval(expr2);
 		assert.ok(function(){
 			return (expr != expr2) && Math.abs(r1 - r0) < 0.0000001;

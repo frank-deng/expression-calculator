@@ -351,6 +351,116 @@
 			}
 			return stack[0];
 		}
+		this.getSimplifiedExpr = function(){
+			var processNum = function(stack, n){
+				stack.push({value:n, priority:100});
+			}
+			var processOper = function(stack, oper){
+				var revAddMinus = function(e){
+					var arr = e.split('');
+					var bracket = 0;
+					for (var i = 0; i < arr.length; i++) {
+						switch (e[i]) {
+							case '+':
+								if (0 == bracket) {
+									arr[i] = '-';
+								}
+							break;
+							case '-':
+								if (0 == bracket) {
+									arr[i] = '+';
+								}
+							break;
+							case '(':
+								bracket++;
+							break;
+							case ')':
+								bracket--;
+							break;
+						}
+					}
+					return arr.join('');
+				}
+				var revMulDiv = function(e){
+					var arr = e.split('');
+					var bracket = 0;
+					for (var i = 0; i < arr.length; i++) {
+						switch (e[i]) {
+							case '*':
+								if (0 == bracket) {
+									arr[i] = '/';
+								}
+							break;
+							case '/':
+								if (0 == bracket) {
+									arr[i] = '*';
+								}
+							break;
+							case '(':
+								bracket++;
+							break;
+							case ')':
+								bracket--;
+							break;
+						}
+					}
+					return arr.join('');
+				}
+				var operData = operand[oper];
+				if (operData.binocular) {
+					var b = stack.pop(), a = stack.pop(), temp;
+					if (operData.exchangeable && String(a.value) > String(b.value)) {
+						temp = a; a = b; b = temp;
+					}
+					if (a.priority < operData.priority) {
+						a.value = '('+a.value+')';
+					}
+					var value = a.value + oper;
+					if (b.priority > operData.priority) {
+						value += b.value;
+					} else if (b.priority < operData.priority) {
+						b.value = '('+b.value+')';
+						value += b.value;
+					} else {
+						switch(oper) {
+							case '-':
+								value += revAddMinus(b.value);
+							break;
+							case '/':
+								value += revMulDiv(b.value);
+							break;
+							default:
+								value += b.value;
+							break;
+						}
+					}
+					stack.push({
+						value:value,
+						priority:operData.priority,
+					});
+				} else {
+					var node = stack[stack.length-1];
+					if ('NEG' == oper) {
+						node.value = (node.priority == 100 ? '-'+node.value : '-('+node.value+')');
+					}
+					node.priority = 0;
+				}
+			};
+
+			if (undefined === rpnTokens || rpnTokens.length == 0) {
+				return '';
+			}
+			var stack = new Array();
+			for (var i = 0; i < rpnTokens.length; i++) {
+				var token = rpnTokens[i];
+				if (token.type == NUM || token.type == VAR) {
+					processNum(stack, token.value)
+				} else if (token.type == OPER){
+					processOper(stack, token.value);
+				}
+			}
+			return stack[0].value;
+		}
 	};
 	var cp = Calc;
 	cp.SyntaxError = SyntaxError;
@@ -358,115 +468,6 @@
 	cp.TOKEN_NUM = NUM;
 	cp.TOKEN_VAR = VAR;
 	cp.TOKEN_OPER = OPER;
-
-	//Convert RPN to expression
-	cp.rpn2Expr = function(rpn){
-		var processNum = function(stack, n){
-			stack.push({value:n, priority:100});
-		}
-		var processOper = function(stack, oper){
-			var revAddMinus = function(e){
-				var arr = e.split('');
-				var bracket = 0;
-				for (var i = 0; i < arr.length; i++) {
-					switch (e[i]) {
-						case '+':
-							if (0 == bracket) {
-								arr[i] = '-';
-							}
-						break;
-						case '-':
-							if (0 == bracket) {
-								arr[i] = '+';
-							}
-						break;
-						case '(':
-							bracket++;
-						break;
-						case ')':
-							bracket--;
-						break;
-					}
-				}
-				return arr.join('');
-			}
-			var revMulDiv = function(e){
-				var arr = e.split('');
-				var bracket = 0;
-				for (var i = 0; i < arr.length; i++) {
-					switch (e[i]) {
-						case '*':
-							if (0 == bracket) {
-								arr[i] = '/';
-							}
-						break;
-						case '/':
-							if (0 == bracket) {
-								arr[i] = '*';
-							}
-						break;
-						case '(':
-							bracket++;
-						break;
-						case ')':
-							bracket--;
-						break;
-					}
-				}
-				return arr.join('');
-			}
-			var operData = operand[oper];
-			if (operData.binocular) {
-				var b = stack.pop(), a = stack.pop(), temp;
-				if (operData.exchangeable && String(a.value) > String(b.value)) {
-					temp = a; a = b; b = temp;
-				}
-				if (a.priority < operData.priority) {
-					a.value = '('+a.value+')';
-				}
-				var value = a.value + oper;
-				if (b.priority > operData.priority) {
-					value += b.value;
-				} else if (b.priority < operData.priority) {
-					b.value = '('+b.value+')';
-					value += b.value;
-				} else {
-					switch(oper) {
-						case '-':
-							value += revAddMinus(b.value);
-						break;
-						case '/':
-							value += revMulDiv(b.value);
-						break;
-						default:
-							value += b.value;
-						break;
-					}
-				}
-				stack.push({
-					value:value,
-					priority:operData.priority,
-				});
-			} else {
-				var node = stack[stack.length-1];
-				if ('NEG' == oper) {
-					node.value = (node.priority == 100 ? '-'+node.value : '-('+node.value+')');
-				}
-				node.priority = 0;
-			}
-		};
-
-		var stack = new Array();
-		for (var i = 0; i < rpn.length; i++) {
-			var token = rpn[i];
-			if (token.type == NUM || token.type == VAR) {
-				processNum(stack, token.value)
-			} else if (token.type == OPER){
-				processOper(stack, token.value);
-			}
-		}
-		return stack[0].value;
-	}
 	return Calc;
 }));
 
