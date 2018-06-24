@@ -1,4 +1,5 @@
-var Calc = require('./exprcalc.min');
+var Calc = require('./exprcalc');
+var Calc2 = require('./exprcalc.min');
 var exprGen = require('./exprgen');
 
 QUnit.test("Basic Test", function(assert) {
@@ -6,6 +7,11 @@ QUnit.test("Basic Test", function(assert) {
 	assert.strictEqual((new Calc()).compile('- 3+ - (-3.1-4)*5/-10').calc(), -6.55);
 	assert.strictEqual((new Calc()).compile('3-((-4))').calc(), 7);
 	assert.strictEqual((new Calc()).compile('3-((-4))+4').calc(), 11);
+
+	assert.strictEqual((new Calc2()).compile('1+1').calc(), 2);
+	assert.strictEqual((new Calc2()).compile('- 3+ - (-3.1-4)*5/-10').calc(), -6.55);
+	assert.strictEqual((new Calc2()).compile('3-((-4))').calc(), 7);
+	assert.strictEqual((new Calc2()).compile('3-((-4))+4').calc(), 11);
 });
 QUnit.test("Compile Multiple Exprs", function(assert) {
 	var calc = new Calc();
@@ -13,9 +19,20 @@ QUnit.test("Compile Multiple Exprs", function(assert) {
 	assert.strictEqual(calc.compile('- 3+ - (-3.1-4)*5/-10').calc(), -6.55);
 	assert.strictEqual(calc.compile('3-((-4))').calc(), 7);
 	assert.strictEqual(calc.compile('3-((-4))+4').calc(), 11);
+
+	calc = new Calc2();
+	assert.strictEqual(calc.compile('1+1').calc(), 2);
+	assert.strictEqual(calc.compile('- 3+ - (-3.1-4)*5/-10').calc(), -6.55);
+	assert.strictEqual(calc.compile('3-((-4))').calc(), 7);
+	assert.strictEqual(calc.compile('3-((-4))+4').calc(), 11);
 });
 QUnit.test("Zero Division", function(assert) {
 	var calc = new Calc();
+	assert.strictEqual(calc.compile('3/0').calc(), Infinity);
+	assert.strictEqual(calc.compile('3/(1-1)*2').calc(), Infinity);
+	assert.strictEqual(calc.compile('-3/(1-1)').calc(), -Infinity);
+
+	calc = new Calc2();
 	assert.strictEqual(calc.compile('3/0').calc(), Infinity);
 	assert.strictEqual(calc.compile('3/(1-1)*2').calc(), Infinity);
 	assert.strictEqual(calc.compile('-3/(1-1)').calc(), -Infinity);
@@ -194,6 +211,90 @@ QUnit.test("RPN Input", function(assert) {
 	assert.deepEqual(calc.getRPN(), rpn);
 	assert.strictEqual(calc.calc(), 11);
 });
+QUnit.test("Malformed RPN", function(assert) {
+	var calc = new Calc();
+	var rpnGood = [
+		{type:Calc.TOKEN_NUM, value:1},
+		{type:Calc.TOKEN_NUM, value:2},
+		{type:Calc.TOKEN_OPER, value:'+'},
+	];
+	calc.setRPN(rpnGood);
+
+	assert.throws(
+		function(){
+			calc.setRPN([]);
+		},
+		function(e){
+			return (
+				(e instanceof Calc.RPNError)
+				&& e.message === 'Empty RPN'
+				&& e.token === undefined
+				&& e.pos === undefined
+			);
+		}
+	);
+	assert.throws(
+		function(){
+			calc.setRPN([
+				{type:Calc.TOKEN_NUM, value:5},
+				{type:Calc.TOKEN_NUM, value:6},
+				{type:Calc.TOKEN_OPER, value:'+'},
+				{type:Calc.TOKEN_NUM, value:'aaa'},
+				{type:Calc.TOKEN_OPER, value:'*'},
+			]);
+		},
+		function(e){
+			return (
+				(e instanceof Calc.RPNError)
+				&& e.message === 'Invalid Number'
+				&& e.token.type === Calc.TOKEN_NUM
+				&& e.token.value === 'aaa'
+				&& e.pos === 3
+			);
+		}
+	);
+	assert.throws(
+		function(){
+			calc.setRPN([
+				{type:Calc.TOKEN_NUM, value:5},
+				{type:Calc.TOKEN_VAR, value:2333},
+				{type:Calc.TOKEN_OPER, value:'+'},
+				{type:Calc.TOKEN_VAR, value:'b'},
+				{type:Calc.TOKEN_OPER, value:'*'},
+			]);
+		},
+		function(e){
+			return (
+				(e instanceof Calc.RPNError)
+				&& e.message === 'Invalid Variable'
+				&& e.token.type === Calc.TOKEN_VAR
+				&& e.token.value === 2333
+				&& e.pos === 1
+			);
+		}
+	);
+	assert.throws(
+		function(){
+			calc.setRPN([
+				{type:Calc.TOKEN_NUM, value:5},
+				{type:Calc.TOKEN_NUM, value:6},
+				{type:Calc.TOKEN_OPER, value:'$'},
+				{type:Calc.TOKEN_VAR, value:'a'},
+				{type:Calc.TOKEN_OPER, value:'*'},
+			]);
+		},
+		function(e){
+			return (
+				(e instanceof Calc.RPNError)
+				&& e.message === 'Invalid Operand'
+				&& e.token.type === Calc.TOKEN_OPER
+				&& e.token.value === '$'
+				&& e.pos === 2
+			);
+		}
+	);
+	assert.deepEqual(calc.getRPN(), rpnGood);
+});
 QUnit.test("Applying Variables", function(assert) {
 	var rpn, calc = new Calc();
 
@@ -260,10 +361,16 @@ QUnit.test("Variables With Malformed Value", function(assert) {
 	assert.strictEqual(calc.calc({a:undefined, b:3}), -3);
 });
 QUnit.test("Random Expression", function(assert) {
-	var calc = new Calc(), count = 1000;
+	var calc = new Calc(), calc2 = new Calc2(), calc3 = new Calc(), calc4 = new Calc2(), count = 1000;
 	while (count--){
 		var expr = exprGen(3+(Math.random()*40).toFixed(0));
 		assert.strictEqual(calc.compile(expr).calc(), eval(expr), expr);
+		expr = exprGen(3+(Math.random()*40).toFixed(0));
+		assert.strictEqual(calc2.compile(expr).calc(), eval(expr), expr);
+		expr = exprGen(3+(Math.random()*40).toFixed(0));
+		assert.strictEqual(calc3.compile(expr).calc(), eval(expr), expr);
+		expr = exprGen(3+(Math.random()*40).toFixed(0));
+		assert.strictEqual(calc4.compile(expr).calc(), eval(expr), expr);
 	}
 });
 QUnit.test("Convert RPN to Expression", function(assert){
