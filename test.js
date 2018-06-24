@@ -235,6 +235,21 @@ QUnit.test("Malformed RPN", function(assert) {
 	);
 	assert.throws(
 		function(){
+			calc.setRPN([{
+				aaa: 111,
+			}]);
+		},
+		function(e){
+			return (
+				(e instanceof Calc.RPNError)
+				&& e.message === 'Invalid Token'
+				&& e.token.aaa === 111
+				&& e.pos === 0
+			);
+		}
+	);
+	assert.throws(
+		function(){
 			calc.setRPN([
 				{type:Calc.TOKEN_NUM, value:5},
 				{type:Calc.TOKEN_NUM, value:6},
@@ -290,6 +305,61 @@ QUnit.test("Malformed RPN", function(assert) {
 				&& e.token.type === Calc.TOKEN_OPER
 				&& e.token.value === '$'
 				&& e.pos === 2
+			);
+		}
+	);
+	assert.throws(
+		function(){
+			calc.setRPN([
+				{type:Calc.TOKEN_NUM, value:5},
+				{type:Calc.TOKEN_NUM, value:6},
+				{type:Calc.TOKEN_OPER, value:'+'},
+				{type:Calc.TOKEN_OPER, value:'*'},
+			]);
+		},
+		function(e){
+			return (
+				(e instanceof Calc.RPNError)
+				&& e.message === 'Unexpected Operand'
+				&& e.token.type === Calc.TOKEN_OPER
+				&& e.token.value === '*'
+				&& e.pos === 3
+			);
+		}
+	);
+	assert.throws(
+		function(){
+			calc.setRPN([
+				{type:Calc.TOKEN_OPER, value:'NEG'},
+			]);
+		},
+		function(e){
+			return (
+				(e instanceof Calc.RPNError)
+				&& e.message === 'Unexpected Operand'
+				&& e.token.type === Calc.TOKEN_OPER
+				&& e.token.value === 'NEG'
+				&& e.pos === 0
+			);
+		}
+	);
+	assert.throws(
+		function(){
+			calc.setRPN([
+				{type:Calc.TOKEN_NUM, value:5},
+				{type:Calc.TOKEN_NUM, value:6},
+				{type:Calc.TOKEN_OPER, value:'+'},
+				{type:Calc.TOKEN_NUM, value:7},
+				{type:Calc.TOKEN_OPER, value:'*'},
+				{type:Calc.TOKEN_NUM, value:8},
+			]);
+		},
+		function(e){
+			return (
+				(e instanceof Calc.RPNError)
+				&& e.message === 'Invalid RPN'
+				&& e.token === undefined
+				&& e.pos === undefined
 			);
 		}
 	);
