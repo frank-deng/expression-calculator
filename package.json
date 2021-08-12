@@ -4,8 +4,8 @@
   "description": "Calculate expressions without using `eval()`, using LL(1) syntax analyzer.",
   "main": "exprcalc.js",
   "scripts": {
-	"build": "uglifyjs -c -m -o exprcalc.min.js exprcalc.js",
-    "test": "qunit-cli -c exprcalc.min.js test.js"
+    "build": "uglifyjs -c -m -o exprcalc.min.js exprcalc.js",
+    "test": "mochapack --webpack-config webpack.config-test.js src/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -13,7 +13,9 @@
   },
   "keywords": [
     "Parser",
-    "Calc"
+    "Calc",
+    "Expression",
+    "Calculator"
   ],
   "author": "Frank Deng",
   "license": "MIT",
@@ -21,9 +23,18 @@
     "url": "https://github.com/frank-deng/expression-calculator/issues"
   },
   "homepage": "https://github.com/frank-deng/expression-calculator#readme",
+  "browserslist": [
+    "defaults"
+  ],
   "devDependencies": {
-    "qunit-cli": "",
-    "uglify-js": ""
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "babel-loader": "^8.2.2",
+    "mocha": "^9.0.2",
+    "mochapack": "^2.1.2",
+    "webpack": "^5.45.1",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^4.0.0-rc.0",
+    "webpack-node-externals": "^3.0.0"
   }
 }
-
