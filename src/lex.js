@@ -6,7 +6,7 @@ import {
 import {
     OPERAND_MATCHER
 }from './operands';
-class LexParser{
+export default class LexParser{
     static __lexTable=[
         {
             rule:/^\s+/,
@@ -30,7 +30,7 @@ class LexParser{
         },
     ];
     constructor(input){
-        this.__input=input;
+        this.__input=this.__inputOrig=input;
         this.__pos=0;
     }
     [Symbol.iterator](){
@@ -49,6 +49,9 @@ class LexParser{
         }
         //None of the lex rules matched
         return null;
+    }
+    getPos(){
+        return this.__pos;
     }
     next(){
         while(this.__input){
@@ -72,12 +75,11 @@ class LexParser{
                 }
             };
         }
-        //Parsing finished
+        //Parsing finished, reset state
+        this.__input=this.__inputOrig;
+        this.__pos=0;
         return {
             done:true
         };
     }
-}
-export default function lex(input){
-    return new LexParser(input);
 }
