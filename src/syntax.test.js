@@ -119,6 +119,20 @@ describe('Syntax Checker Test',function(){
             {type:NUM,value:"1"}
         ]);
     });
+    it('2333+(-1-666)',function(){
+        assert.deepStrictEqual([
+            ...new SyntaxChecker('2333+(-1-666)')
+        ],[
+            {type:NUM,value:"2333"},
+            {type:OPER,value:"+"},
+            {type:OPER,value:"("},
+            {type:OPER,value:"NEG"},
+            {type:NUM,value:"1"},
+            {type:OPER,value:"-"},
+            {type:NUM,value:"666"},
+            {type:OPER,value:")"}
+        ]);
+    });
 });
 
 describe('Syntax Error Test',function(){

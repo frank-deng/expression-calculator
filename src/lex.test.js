@@ -42,6 +42,19 @@ describe('lex test',function(){
             {type:NUM,value:"1"}
         ]);
     });
+    it('(1 + 1) ** 6',function(){
+        assert.deepStrictEqual([
+            ...new LexParser('(1 + 1) ** 6')
+        ],[
+            {type:OPER,value:'('},
+            {type:NUM,value:"1"},
+            {type:OPER,value:'+'},
+            {type:NUM,value:"1"},
+            {type:OPER,value:')'},
+            {type:OPER,value:'**'},
+            {type:NUM,value:"6"},
+        ]);
+    });
     it('  a *   b+1 ',function(){
         assert.deepStrictEqual([
             ...new LexParser('  a *   b+1 ')
