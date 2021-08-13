@@ -79,7 +79,7 @@ const OPERAND_ALL={
         }
     },
 };
-let operandAll=[];
+let operandAll=['(',')'];
 for(let oper in OPERAND_ALL){
     let operDetail=OPERAND_ALL[oper];
     if(false===operDetail.match){

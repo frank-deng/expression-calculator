@@ -108,4 +108,48 @@ describe('Syntax Checker Test',function(){
             ...new SyntaxChecker('23.43.23')
         ],new SyntaxError('Unexpected Character at position 5'));
     });
+    it('-1+-1',function(){
+        assert.deepStrictEqual([
+            ...new SyntaxChecker('-1+-1')
+        ],[
+            {type:OPER,value:"NEG"},
+            {type:NUM,value:"1"},
+            {type:OPER,value:"+"},
+            {type:OPER,value:"NEG"},
+            {type:NUM,value:"1"}
+        ]);
+    });
+});
+
+describe('Syntax Error Test',function(){
+    it('--1',function(){
+        assert.throws(()=>[
+            ...new SyntaxChecker('--1')
+        ],new SyntaxError('Invalid input at position 1'));
+    });
+    it('---1',function(){
+        assert.throws(()=>[
+            ...new SyntaxChecker('---1')
+        ],new SyntaxError('Invalid input at position 1'));
+    });
+    it('-+-1',function(){
+        assert.throws(()=>[
+            ...new SyntaxChecker('-+-1')
+        ],new SyntaxError('Invalid input at position 1'));
+    });
+    it('-1+--1',function(){
+        assert.throws(()=>[
+            ...new SyntaxChecker('-1+--1')
+        ],new SyntaxError('Invalid input at position 4'));
+    });
+    it('((1+2)',function(){
+        assert.throws(()=>[
+            ...new SyntaxChecker('((1+2)')
+        ],new SyntaxError('Bracket mismatch'));
+    });
+    it('(1+2))',function(){
+        assert.throws(()=>[
+            ...new SyntaxChecker('(1+2))')
+        ],new SyntaxError('Bracket mismatch'));
+    });
 });
