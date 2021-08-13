@@ -3,7 +3,32 @@ import {
     VAR,
     OPER
 } from './types';
+import {
+    OPERAND_MATCHER
+}from './operands';
 class LexParser{
+    static __lexTable=[
+        {
+            rule:/^\s+/,
+            type:null
+        },
+        {
+            rule:/^0x[0-9A-Fa-f]+/,
+            type:NUM
+        },
+        {
+            rule:/^[0-9]+(\.[0-9]+)?([Ee][+\-][0-9]+)?/,
+            type:NUM
+        },
+        {
+            rule:OPERAND_MATCHER,
+            type:OPER
+        },
+        {
+            rule:/^[A-Za-z_\u0080-\uffff][A-Za-z0-9_\u0080-\uffff]*/,
+            type:VAR
+        },
+    ];
     constructor(input){
         this.__input=input;
         this.__pos=0;
@@ -12,29 +37,7 @@ class LexParser{
         return this;
     }
     __proc(input){
-        const lexTable=[
-            {
-                rule:/^0x[0-9A-Fa-f]+/g,
-                type:NUM
-            },
-            {
-                rule:/^[0-9]+(\.[0-9]+)?([Ee][+\-][0-9]+)?/g,
-                type:NUM
-            },
-            {
-                rule:/^[+\-\*\/\(\)]/g,
-                type:OPER
-            },
-            {
-                rule:/^[A-Za-z_\u0080-\uffff][A-Za-z0-9_\u0080-\uffff]*/g,
-                type:VAR
-            },
-            {
-                rule:/^\s+/g,
-                type:null
-            },
-        ];
-        for (let lex of lexTable) {
+        for (let lex of LexParser.__lexTable) {
             let match=lex.rule.exec(input);
             if(!match || 0!=match.index){
                 continue;
