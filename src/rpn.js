@@ -106,10 +106,6 @@ export default class RPN{
                     if('string'!=typeof(value) || !value){
                         throw new SyntaxError(`Invalid RPN token at position ${i}`);
                     }
-                    result.push({
-                        type,
-                        value
-                    });
                     stack++;
                 }else if(NUM===type){
                     try{
@@ -117,20 +113,12 @@ export default class RPN{
                     }catch(e){
                         throw new TypeError(`Invalid number at position ${i}`);
                     }
-                    result.push({
-                        type,
-                        value
-                    });
                     stack++;
                 }else if(OPER===type){
                     let operand=OPERAND_ALL[value];
                     if(!operand){
                         throw new TypeError(`Invalid operand at position ${i}`);
                     }
-                    result.push({
-                        type,
-                        value
-                    });
                     if((!operand.binocular && stack<1)
                         || (operand.binocular && stack<2)){
                         throw new SyntaxError(`Invalid RPN`);
@@ -139,6 +127,11 @@ export default class RPN{
                 }else{
                     throw new SyntaxError(`Invalid RPN token at position ${i}`);
                 }
+                //All the validation for current token passed, write to result.
+                result.push({
+                    type,
+                    value
+                });
             }catch(e){
                 console.error(e);
                 throw new SyntaxError(`Invalid RPN token at position ${i}`);
