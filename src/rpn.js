@@ -77,7 +77,7 @@ export default class RPN{
 					type: NUM,
 					value: operand.processor(a,b),
 				});
-			} else if (!operand_data.binocular
+			} else if (!operand.binocular
 				&& result.length > 0
 				&& result[result.length-1].type == NUM) {
 				result.push({
@@ -95,10 +95,60 @@ export default class RPN{
         return this.__data.map((item)=>({...item}));
     }
     setRPN(input){
-        this.__data=input.map((item)=>({
-            type:item.type,
-            value:item.value
-        }));
+        if(!Array.isArray(input)){
+            throw new TypeError('Input must be an array with objects contains key "type" and "value"');
+        }
+        let result=[],stack=0;
+        input.forEach((token,i)=>{
+            try{
+                let type=token.type, value=token.value;
+                if(VAR===type){
+                    if('string'!=typeof(value) || !value){
+                        throw new SyntaxError(`Invalid RPN token at position ${i}`);
+                    }
+                    result.push({
+                        type,
+                        value
+                    });
+                    stack++;
+                }else if(NUM===type){
+                    try{
+                        value=this.__numConv(value);
+                    }catch(e){
+                        throw new TypeError(`Invalid number at position ${i}`);
+                    }
+                    result.push({
+                        type,
+                        value
+                    });
+                    stack++;
+                }else if(OPER===type){
+                    let operand=OPERAND_ALL[value];
+                    if(!operand){
+                        throw new TypeError(`Invalid operand at position ${i}`);
+                    }
+                    result.push({
+                        type,
+                        value
+                    });
+                    if((!operand.binocular && stack<1)
+                        || (operand.binocular && stack<2)){
+                        throw new SyntaxError(`Invalid RPN`);
+                    }
+                    stack--;
+                }else{
+                    throw new SyntaxError(`Invalid RPN token at position ${i}`);
+                }
+            }catch(e){
+                console.error(e);
+                throw new SyntaxError(`Invalid RPN token at position ${i}`);
+            }
+        });
+        if(1!=stack){
+            throw new SyntaxError(`Invalid RPN`);
+        }
+        this.__data=result;
+        return this;
     }
     calc(valueTable={}){
         if(!this.__data.length){
@@ -112,7 +162,7 @@ export default class RPN{
                 continue;
             }
             if(VAR==token.type){
-                if(!valueTable.hasKey(token.value)){
+                if(!valueTable.hasOwnProperty(token.value)){
                     throw new ReferenceError(`Value of variable ${token.value} not specified.`);
                 }
                 stack.push(this.__numConv(valueTable[token.value]));
