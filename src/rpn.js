@@ -6,7 +6,7 @@ import {
 import OPERAND_ALL from './operands';
 import SyntaxChecker from "./syntax";
 
-export class RPN{
+export default class RPN{
     __data=[];
     constructor(input){
         if('string'==typeof(input)){
@@ -33,6 +33,7 @@ export class RPN{
 				if (!stackOper.length || token.value == '(') {
 					stackOper.push(token);
 				} else if (token.value == ')') {
+                    let token_pop=null;
 					while (token_pop = stackOper.pop()) {
 						if (token_pop.value == '(') {
 							break;
@@ -42,7 +43,7 @@ export class RPN{
 				} else {
 					while (stackOper.length) {
                         let stackOperTop=stackOper[stackOper.length-1].value;
-                        if('('==stackOperTop || operand[stackOperTop].priority < operand[token.value].priority){
+                        if('('==stackOperTop || OPERAND_ALL[stackOperTop].priority < OPERAND_ALL[token.value].priority){
                             break;
                         }
                         stackMain.push(stackOper.pop());
@@ -107,14 +108,14 @@ export class RPN{
         let stack=[];
         for(let token of this.__data){
             if(NUM==token.type){
-                result.push(token.value);
+                stack.push(token.value);
                 continue;
             }
             if(VAR==token.type){
                 if(!valueTable.hasKey(token.value)){
                     throw new ReferenceError(`Value of variable ${token.value} not specified.`);
                 }
-                result.push(this.__numConv(valueTable[token.value]));
+                stack.push(this.__numConv(valueTable[token.value]));
                 continue;
             }
             if(OPER==token.type){
