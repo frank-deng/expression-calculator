@@ -2,9 +2,9 @@
   "name": "expression-calculator",
   "version": "0.0.5",
   "description": "Calculate expressions without using `eval()`, using LL(1) syntax analyzer.",
-  "main": "exprcalc.js",
+  "main": "dist/exprcalc.js",
   "scripts": {
-    "build": "uglifyjs -c -m -o exprcalc.min.js exprcalc.js",
+    "build": "webpack",
     "test": "mochapack --webpack-config webpack.config-test.js src/*.test.js"
   },
   "repository": {
@@ -30,8 +30,16 @@
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
     "babel-loader": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "cssnano": "^5.0.7",
+    "html-webpack-plugin": "^5.3.2",
+    "less": "^4.1.1",
+    "less-loader": "^10.0.1",
     "mocha": "^9.0.2",
     "mochapack": "^2.1.2",
+    "postcss": "^8.3.6",
+    "postcss-loader": "^6.1.1",
+    "raw-loader": "^4.0.2",
     "webpack": "^5.45.1",
     "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^4.0.0-rc.0",
