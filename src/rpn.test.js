@@ -129,15 +129,16 @@ describe('Basic RPN test',function(){
 		assert.deepStrictEqual(rpn2.getRPN(),template);
 		assert.deepStrictEqual(rpn3.getRPN(),template);
     });
+    it('Empty RPN',function(){
+        let emptyRPN=new RPN().setRPN([]);
+		assert.deepStrictEqual(emptyRPN.getRPN(),[]);
+		assert.deepStrictEqual(emptyRPN.calc(),null);
+    });
 });
 describe('Malformed RPN test',function(){
     it('Non-array',function(){
         assert.throws(()=>new RPN().setRPN('aaa'),
-            TypeError('Input must be a non-empty array with objects contains key "type" and "value"'));
-    });
-    it('Empty array',function(){
-        assert.throws(()=>new RPN().setRPN([]),
-            TypeError('Input must be a non-empty array with objects contains key "type" and "value"'));
+            TypeError('Input must be an array with objects contains key "type" and "value"'));
     });
     it('Malformed array item',function(){
         assert.throws(()=>new RPN().setRPN([
