@@ -143,6 +143,12 @@ describe('Basic RPN test',function(){
 		assert.deepStrictEqual(emptyRPN.getRPN(),[]);
 		assert.deepStrictEqual(emptyRPN.calc(),null);
     });
+    it('Exponentiation test',function(){
+		assert.strictEqual(new RPN('2**2**3').calc(),256);
+    });
+    it('Exponentiation test 2',function(){
+		assert.strictEqual(new RPN('2*2**(1+1)**(4-1)').calc(),512);
+    });
 });
 describe('Malformed RPN test',function(){
     it('Non-array',function(){

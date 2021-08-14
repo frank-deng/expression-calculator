@@ -44,8 +44,12 @@ export default class RPN{
 					}
 				} else {
 					while (stackOper.length) {
-                        let stackOperTop=stackOper[stackOper.length-1].value;
-                        if('('==stackOperTop || OPERAND_ALL[stackOperTop].priority < OPERAND_ALL[token.value].priority){
+                        let stackOperTop=stackOper[stackOper.length-1].value,
+                            operandTop=OPERAND_ALL[stackOperTop],
+                            operandCurrent=OPERAND_ALL[token.value];
+                        if('('==stackOperTop
+                            || operandTop.priority < operandCurrent.priority
+                            || (operandTop.rightToLeft && operandCurrent.rightToLeft)){
                             break;
                         }
                         stackMain.push(stackOper.pop());

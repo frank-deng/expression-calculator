@@ -47,6 +47,7 @@ const OPERAND_ALL={
         binocular: true,
         priority: 16,
         exchangeable: false,
+        rightToLeft:true,
         processor(a,b){
             return a**b;
         }
@@ -55,6 +56,7 @@ const OPERAND_ALL={
         binocular: true,
         priority: 10,
         exchangeable: true,
+        bitwise:true,
         processor(a,b){
             return a&b;
         }
@@ -63,6 +65,7 @@ const OPERAND_ALL={
         binocular: true,
         priority: 8,
         exchangeable: true,
+        bitwise:true,
         processor(a,b){
             return a|b;
         }
@@ -71,6 +74,7 @@ const OPERAND_ALL={
         binocular: true,
         priority: 9,
         exchangeable: true,
+        bitwise:true,
         processor(a,b){
             return a^b;
         }
@@ -78,6 +82,7 @@ const OPERAND_ALL={
     '~':{
         binocular: false,
         priority: 17,
+        bitwise:true,
         processor(a){
             return ~a;
         }
