@@ -35,7 +35,7 @@ describe('Basic RPN test',function(){
 		assert.strictEqual(new RPN('1*1+2*(3-4)').calc(),-1);
     });
 	it('RPN of 1*1+2*(3-4)',function(){
-		assert.deepStrictEqual(new RPN('1*1+2*(3-4)').getRPN(),[
+		assert.deepStrictEqual(new RPN().compile('1*1+2*(3-4)').getRPN(),[
             {type:NUM, value:1},
             {type:NUM, value:1},
             {type:OPER, value:'*'},
@@ -91,5 +91,71 @@ describe('Basic RPN test',function(){
             {type:NUM, value:8},
             {type:OPER, value:'-'},
         ]);
+    });
+    it('RPN get & set',function(){
+        let template=[
+            {type:VAR, value:'a'},
+            {type:NUM, value:3},
+            {type:OPER, value:'+'},
+            {type:NUM, value:2748},
+            {type:OPER, value:'*'},
+            {type:NUM, value:1},
+            {type:NUM, value:8},
+            {type:OPER, value:'*'},
+            {type:OPER, value:'-'},
+        ];
+        let rpn=new RPN('(a+3)*0xabc-1*8');
+        let rpn2=new RPN();
+        let rpn3=new RPN(rpn);
+        rpn2.setRPN(rpn.getRPN());
+		assert.deepStrictEqual(rpn.getRPN(),template);
+		assert.deepStrictEqual(rpn2.getRPN(),template);
+		assert.deepStrictEqual(rpn3.getRPN(),template);
+    });
+});
+describe('Malformed RPN test',function(){
+    it('Non-array',function(){
+        assert.throws(()=>new RPN().setRPN('aaa'),
+            TypeError('Input must be a non-empty array with objects contains key "type" and "value"'));
+    });
+    it('Empty array',function(){
+        assert.throws(()=>new RPN().setRPN([]),
+            TypeError('Input must be a non-empty array with objects contains key "type" and "value"'));
+    });
+    it('Malformed array item',function(){
+        assert.throws(()=>new RPN().setRPN([
+            {value:23333},
+            {type:NUM,value:666},
+            {type:OPER,value:'+'},
+        ]),SyntaxError(`Invalid RPN token at position 0`));
+        assert.throws(()=>new RPN().setRPN([
+            {type:NUM,value:666},
+            null,
+            {type:OPER,value:'+'},
+        ]),SyntaxError(`Invalid RPN token at position 1`));
+    });
+    it('Invalid RPN variable',function(){
+        assert.throws(()=>new RPN().setRPN([
+            {type:VAR,value:23333},
+            {type:NUM,value:666},
+            {type:OPER,value:'+'},
+        ]),SyntaxError(`Invalid RPN token at position 0`));
+        assert.throws(()=>new RPN().setRPN([
+            {type:NUM,value:666},
+            {type:VAR,value:23333},
+            {type:OPER,value:'+'},
+        ]),SyntaxError(`Invalid RPN token at position 1`));
+    });
+    it('Invalid RPN number',function(){
+        assert.throws(()=>new RPN().setRPN([
+            {type:VAR,value:'var'},
+            {type:NUM,value:'#####'},
+            {type:OPER,value:'+'},
+        ]),TypeError(`Invalid number at position 1`));
+        assert.throws(()=>new RPN().setRPN([
+            {type:NUM,value:'#####'},
+            {type:VAR,value:'var'},
+            {type:OPER,value:'+'},
+        ]),TypeError(`Invalid number at position 0`));
     });
 });
