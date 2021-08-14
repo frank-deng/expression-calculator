@@ -17,6 +17,15 @@ describe('Basic RPN test',function(){
             {type:OPER, value:'+'},
         ]);
     });
+	it('RPN of 1+2-3',function(){
+		assert.deepStrictEqual(new RPN('1+2-3').getRPN(),[
+            {type:NUM, value:1},
+            {type:NUM, value:2},
+            {type:OPER, value:'+'},
+            {type:NUM, value:3},
+            {type:OPER, value:'-'},
+        ]);
+    });
 	it('Calculate 1+2*(3-4)',function(){
 		assert.strictEqual(new RPN('1+2*(3-4)').calc(),-1);
     });

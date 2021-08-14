@@ -1,7 +1,11 @@
+/*
+Priority of all the operands reference the following page:
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
+ */
 const OPERAND_ALL={
     '+': {
         binocular: true,
-        priority: 10,
+        priority: 14,
         exchangeable: true,
         processor(a,b){
             return a+b;
@@ -9,7 +13,7 @@ const OPERAND_ALL={
     },
     '-': {
         binocular: true,
-        priority: 10,
+        priority: 14,
         exchangeable: false,
         processor(a,b){
             return a-b;
@@ -17,7 +21,7 @@ const OPERAND_ALL={
     },
     '*': {
         binocular: true,
-        priority: 20,
+        priority: 15,
         exchangeable: true,
         processor(a,b){
             return a*b;
@@ -25,15 +29,23 @@ const OPERAND_ALL={
     },
     '/': {
         binocular: true,
-        priority: 20,
+        priority: 15,
         exchangeable: false,
         processor(a,b){
             return a/b;
         }
     },
+    '%':{
+        binocular: true,
+        priority: 15,
+        exchangeable: false,
+        processor(a,b){
+            return a%b;
+        }
+    },
     '**': {
         binocular: true,
-        priority: 30,
+        priority: 16,
         exchangeable: false,
         processor(a,b){
             return a**b;
@@ -41,7 +53,7 @@ const OPERAND_ALL={
     },
     '&':{
         binocular: true,
-        priority: 8,
+        priority: 10,
         exchangeable: true,
         processor(a,b){
             return a&b;
@@ -57,7 +69,7 @@ const OPERAND_ALL={
     },
     '^':{
         binocular: true,
-        priority: 8,
+        priority: 9,
         exchangeable: true,
         processor(a,b){
             return a^b;
@@ -65,7 +77,7 @@ const OPERAND_ALL={
     },
     '~':{
         binocular: false,
-        priority: 9,
+        priority: 17,
         processor(a){
             return ~a;
         }
@@ -73,7 +85,7 @@ const OPERAND_ALL={
     'NEG': {
         match:false,
         binocular: false,
-        priority: 50,
+        priority: 17,
         processor(a){
             return -a;
         }
