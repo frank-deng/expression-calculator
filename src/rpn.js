@@ -106,11 +106,11 @@ export default class RPN{
             try{
                 type=token.type, value=token.value;
             }catch(e){
-                throw new SyntaxError(`Invalid RPN token at position ${i}`);
+                throw new TypeError(`Invalid RPN token at position ${i}`);
             }
             if(VAR===type){
                 if('string'!=typeof(value) || !value){
-                    throw new SyntaxError(`Invalid RPN token at position ${i}`);
+                    throw new TypeError(`Invalid RPN token at position ${i}`);
                 }
                 stack++;
             }else if(NUM===type){
@@ -129,9 +129,11 @@ export default class RPN{
                     || (operand.binocular && stack<2)){
                     throw new SyntaxError(`Invalid RPN`);
                 }
-                stack--;
+                if(operand.binocular){
+                    stack--;
+                }
             }else{
-                throw new SyntaxError(`Invalid RPN token at position ${i}`);
+                throw new TypeError(`Invalid RPN token at position ${i}`);
             }
             //All the validation for current token passed, write to result.
             result.push({
