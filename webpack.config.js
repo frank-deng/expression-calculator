@@ -16,9 +16,6 @@ module.exports = {
     path: __dirname,
     filename:'[name].js'
   },
-  optimization: {
-    usedExports: true,
-  },
   module: {
     rules: [
       {
