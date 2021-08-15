@@ -4,7 +4,7 @@ module.exports = {
   entry: {
     './dist/exprcalc':{
       publicPath:'/dist/',
-      import:'./src/index.js',
+      import:['core-js/es6/symbol','./src/index.js'],
       library:{
         name: 'Calc',
         export: 'default',
@@ -16,21 +16,15 @@ module.exports = {
     path: __dirname,
     filename:'[name].js'
   },
-  devServer:{
-    static:__dirname,
-    liveReload:false,
-    open:true,
-    port:8082
+  optimization: {
+    usedExports: true,
   },
   module: {
     rules: [
       {
         test: /(\.jsx|\.js)$/,
         use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env"]
-          }
+          loader: "babel-loader"
         },
         exclude: /node_modules/
       }

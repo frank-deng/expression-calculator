@@ -25,8 +25,6 @@ Script Tag
 
 	<script type='text/javascript' src='path/to/exprcalc.js'></script>
 
-Global object `Symbol` should be polyfilled if not exist, espeically for older browsers like IE11.
-
 
 Initialization
 --------------

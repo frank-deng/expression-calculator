@@ -3,6 +3,7 @@
   "version": "1.0.2",
   "description": "Calculate expressions without using `eval()`, using LL(1) syntax analyzer.",
   "main": "dist/exprcalc.js",
+  "sideEffects": false,
   "scripts": {
     "build": "webpack",
     "test": "mochapack --webpack-config webpack.config-test.js src/*.test.js"
