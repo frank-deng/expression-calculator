@@ -140,7 +140,7 @@ describe('Basic RPN test',function(){
     });
     it('Empty RPN',function(){
         let emptyRPN=new RPN().setRPN([]);
-		assert.deepStrictEqual(emptyRPN.getRPN(),[]);
+		assert.deepStrictEqual(emptyRPN.getRPN(),null);
 		assert.deepStrictEqual(emptyRPN.calc(),null);
     });
     it('Exponentiation test',function(){

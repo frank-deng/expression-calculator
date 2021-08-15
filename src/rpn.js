@@ -98,6 +98,9 @@ export default class RPN{
         return this;
     }
     getRPN(){
+        if(!this.__data.length){
+            return null;
+        }
         return this.__data.map((item)=>({...item}));
     }
     setRPN(input){
