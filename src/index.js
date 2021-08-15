@@ -6,9 +6,9 @@ import {
 import RPN from "./rpn";
 
 export default class Calc extends RPN{
-    static NUM=NUM;
-    static VAR=VAR;
-    static OPER=OPER;
+    static TOKEN_NUM=NUM;
+    static TOKEN_VAR=VAR;
+    static TOKEN_OPER=OPER;
     constructor(input){
         super(input);
     }
