@@ -72,11 +72,9 @@ export default class SyntaxChecker extends LexParser{
         return this;
     }
     __reset(){
-        Object.assign(this,{
-            __lastToken:null,
-            __lastTokenType:'START',
-            __bracketDepth:0
-        });
+        this.__lastToken=null;
+        this.__lastTokenType='START';
+        this.__bracketDepth=0;
     }
 	next(){
         const syntaxTable=SyntaxChecker.syntaxTable;

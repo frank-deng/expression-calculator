@@ -5,7 +5,7 @@ module.exports = {
   entry: {
     './dist/exprcalc':{
       publicPath:'/dist/',
-      import:['core-js/es6/symbol','./src/index.js'],
+      import:['./src/index.js'],
       library:{
         name: 'Calc',
         export: 'default',
@@ -14,7 +14,7 @@ module.exports = {
     },
     '__index__':{
       publicPath:'/',
-      import:'./testpage/index.js'
+      import:['./testpage/index.js']
     }
   },
   output:{
