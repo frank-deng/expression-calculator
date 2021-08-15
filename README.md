@@ -8,6 +8,11 @@ Useful to parse and calculate expression without using `eval()`, so as to avoid 
 Installation
 ------------
 
+	npm install --save expression-calculator
+
+Import
+------
+
 ES6/Webpack
 
 	import Calc from 'expression-calculator';
@@ -19,6 +24,8 @@ Node.js
 Script Tag
 
 	<script type='text/javascript' src='path/to/exprcalc.js'></script>
+
+Global object `Symbol` should be polyfilled if not exist, espeically for older browsers like IE11.
 
 
 Initialization
