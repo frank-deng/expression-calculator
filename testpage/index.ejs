@@ -3,19 +3,19 @@
     <head>
         <meta charset="UTF-8"/>
         <meta name='viewport' id='viewport' content='width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no'/>
-        <title>Line Folding Test Page</title>
+        <title>Expression Calculator Test Page</title>
         <style type='text/css'><%=require('./index.less').default%></style>
         <script type='text/javascript' src='./dist/exprcalc.js'></script>
     </head>
     <body>
 		<ribbon><a href='https://github.com/frank-deng/linefold/'>Fork me on GitHub</a></ribbon>
         <form class='inputForm' method="post" action="#" id='inputForm'>
-            <input placeholder="请输入表达式" name='exprInput'/>
-            <textarea placeholder="每行指定一个变量的值，格式：“变量名=变量值”" name='varInput'></textarea>
-            <button disabled type='submit'>计算</button>
+            <input placeholder="Input expression" name='exprInput'/>
+            <textarea placeholder="Input variables" name='varInput'></textarea>
+            <button disabled type='submit' translate='Calculate'>Calculate</button>
         </form>
         <div class='errorInfo' id='errorInfo'></div>
-        <div class='calcResult' id='calcResult'>计算结果：<span id='calcResultNum'></span></div>
+        <div class='calcResult' id='calcResult'><span translate="Calculate Result"></span><span id='calcResultNum'></span></div>
     </body>
 <% if('development'==(env.NODE_ENV||'').trim()){ %>
     <script src='__index__.js'></script>
