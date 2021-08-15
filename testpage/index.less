@@ -1,0 +1,123 @@
+body{
+	margin:0 auto;
+	padding:50px 10px 10px 10px;
+	font-family:微软雅黑,sans;
+	color:#303133;
+}
+:-ms-input-placeholder{
+	font-family:微软雅黑,sans !important;
+	font-size:16px !important;
+	color:#C0C4CC !important;
+}
+::-moz-placeholder{
+	font-family:微软雅黑,sans;
+	font-size:16px;
+	color:#C0C4CC;
+}
+::-webkit-input-placeholder{
+	font-family:微软雅黑,sans;
+	font-size:16px;
+	color:#C0C4CC;
+}
+ribbon{
+	display:block;
+	position:fixed;
+	top:0;
+	right:0;
+	background-color: #aa0000;
+	box-shadow: 0 0 5px 2px #888888;
+	overflow: hidden;
+	user-select:none;
+	user-drag:none;
+	a{
+		font-size: 12px;
+		font-weight: bold;
+		overflow: hidden;
+		display: block;
+		color: #ffffff;
+		text-align: center;
+		text-decoration: none;
+		border-top: 1px solid #ffffff;
+		border-bottom: 1px solid #ffffff;
+		margin: 2px 0;
+		width: 260px;
+		line-height: 30px;
+	}
+}
+@media only screen and (min-width: 600px){
+    body{
+        padding-top:10px;
+    }
+	ribbon {
+		transform-origin:50px 50%;
+		transform:translate(83px, 0px) rotate(45deg);
+	}
+    .inputForm{
+        margin-right:170px;
+    }
+}
+
+.inputForm{
+	margin-bottom:10px;
+	input,textarea{
+        display: block;
+		width:100%;
+        font-size:16px;
+        -webkit-appearance: none;
+        background-color: #fff;
+        background-image: none;
+        border-radius: 4px;
+        border: 1px solid #dcdfe6;
+        color: #333333;
+        padding:0 8px;
+        outline:none;
+        margin:0 10px 10px 0;
+		box-sizing: border-box;
+	}
+	input{
+        height:30px;
+        line-height:28px;
+		::-ms-clear{
+			display:none;
+			height:0;
+			width:0;
+		}
+	}
+	textarea{
+		resize:vertical;
+        line-height:20px;
+		height:130px;
+		padding:4px 8px;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+	button{
+		line-height:30px;
+		height:30px;
+		border-radius:15px;
+		min-width:60px;
+		padding:0 14px;
+		border:none;
+		background-color: #409eff;
+		color:#ffffff;
+		font-size:16px;
+		cursor: pointer;
+		&:hover{
+			background-color: #66b1ff;
+		}
+		&:disabled{
+			cursor: not-allowed;
+			background-color: #a0cfff;
+			&:hover{
+				background-color: #a0cfff;
+			}
+		}
+	}
+}
+.errorInfo{
+	display:none;
+	color:#F56C6C;
+}
+.calcResult{
+	display:none;
+}
