@@ -116,24 +116,6 @@ The code above will generate the following JSON data:
 	
 In the expression above, each token's type value has an alias, you may refer to **Aliases** section for detail.
 
-You may also use it to check if the input expression is valid:
-
-	var calc = new Calc();
-	function checkExpr(expr) {
-		try {
-			var rpn = calc.compile(expr).getRPN();
-			for (var i = 0; i < rpn.length; i++) {
-				if (rpn[i].type == VAR) {
-					return false;
-				}
-			}
-		} catch(e) {
-			return false;
-		}
-		return true;
-	}
-
-
 ### `setRPN(expr)`
 
 Load previously compiled RPN from other source like database or memcache/redis.
