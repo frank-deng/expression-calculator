@@ -7,14 +7,14 @@ try{
             'Input expression':'Input expression',
             'Input variables':'Input variables here, format: "varName=value"',
             Calculate:'Calculate',
-            'Calculate Result':'Calculate Result: '
+            calc_ans:'Calculation Answer: '
         },
         zh:{
             title:'表达式计算器测试页面',
             'Input expression':'请输入表达式',
             'Input variables':'每行指定一个变量的值，格式：“变量名=变量值”',
             Calculate:'计算',
-            'Calculate Result':'计算结果：'
+            calc_ans:'计算结果：'
         }
     });
     document.title=lang.get('title');
@@ -35,12 +35,15 @@ try{
 const inputForm=document.getElementById('inputForm');
 const exprInput=inputForm.querySelector('[name="exprInput"]');
 const submitBtn=inputForm.querySelector('[type="submit"]');
-const errorInfo=document.getElementById('errorInfo');
 const calcResult=document.getElementById('calcResult');
-const calcResultNum=document.getElementById('calcResultNum');
 function displayResult(value){
-    calcResult.style.display='inline-block';
-    calcResultNum.innerHTML=value;
+    if(value instanceof Error){
+        calcResult.classList.add('error');
+        calcResult.innerHTML=value.message;
+    }else{
+        calcResult.classList.remove('error');
+        calcResult.innerHTML=lang.get('calc_ans')+value;
+    }
 }
 function parseVarInput(input){
     if(!input){
@@ -66,16 +69,13 @@ exprInput.addEventListener('blur',updateSubmitStatus);
 inputForm.addEventListener('submit',function(e){
     e.preventDefault();
     try{
-        calcResult.style.display='none';
-        errorInfo.style.display='none';
         let calc=new Calc(e.target[0].value);
         let varTable=parseVarInput(e.target[1].value);
         displayResult(calc.calc(varTable));
         return false;
     }catch(e){
         console.error(e);
-        errorInfo.style.display='inline-block';
-        errorInfo.innerHTML=e.message;
+        displayResult(e);
     }
     return false;
 });

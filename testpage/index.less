@@ -4,6 +4,7 @@ body{
 	font-family:微软雅黑,sans;
 	color:#303133;
 	user-select: none;
+	-ms-user-select: none;
 }
 :-ms-input-placeholder{
 	font-family:微软雅黑,sans !important;
@@ -118,16 +119,12 @@ ribbon{
 		}
 	}
 }
-.errorInfo,.calcResult{
+.calcResult{
 	display: inline-block;
 	vertical-align: top;
 	line-height: 20px;
 	padding:5px 0;
-}
-.errorInfo{
-	display:none;
-	color:#F56C6C;
-}
-.calcResult{
-	display:none;
+	&.error{
+		color:#F56C6C;
+	}
 }
