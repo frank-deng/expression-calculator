@@ -29,7 +29,7 @@ Node.js
 
 Script Tag
 
-	<script type='text/javascript' src='path/to/exprcalc.js'></script>
+	<script type='text/javascript' src='./dist/exprcalc.js'></script>
 
 
 Initialization
