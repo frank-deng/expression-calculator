@@ -5,7 +5,7 @@ module.exports = {
   entry: {
     './dist/exprcalc':{
       publicPath:'/dist/',
-      import:['./src/index.js'],
+      import:['core-js/modules/es.symbol.iterator.js','./src/index.js'],
       library:{
         name: 'Calc',
         export: 'default',

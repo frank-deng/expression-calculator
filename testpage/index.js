@@ -1,6 +1,7 @@
 import Lang from './lang.js';
+let lang=null;
 try{
-    const lang=new Lang({
+    lang=new Lang({
         en:{
             title:'Expression Calculator Test Page',
             'Input expression':'Input expression',
@@ -38,7 +39,7 @@ const errorInfo=document.getElementById('errorInfo');
 const calcResult=document.getElementById('calcResult');
 const calcResultNum=document.getElementById('calcResultNum');
 function displayResult(value){
-    calcResult.style.display='block';
+    calcResult.style.display='inline-block';
     calcResultNum.innerHTML=value;
 }
 function parseVarInput(input){
@@ -73,7 +74,7 @@ inputForm.addEventListener('submit',function(e){
         return false;
     }catch(e){
         console.error(e);
-        errorInfo.style.display='block';
+        errorInfo.style.display='inline-block';
         errorInfo.innerHTML=e.message;
     }
     return false;

@@ -13,9 +13,12 @@
             <input placeholder="Input expression" name='exprInput'/>
             <textarea placeholder="Input variables" name='varInput'></textarea>
             <button disabled type='submit' translate='Calculate'>Calculate</button>
+            <div class='errorInfo' id='errorInfo'></div>
+            <div class='calcResult' id='calcResult'>
+                <span translate="Calculate Result"></span><!--
+                --><span id='calcResultNum'></span>
+            </div>
         </form>
-        <div class='errorInfo' id='errorInfo'></div>
-        <div class='calcResult' id='calcResult'><span translate="Calculate Result"></span><span id='calcResultNum'></span></div>
     </body>
 <% if('development'==(env.NODE_ENV||'').trim()){ %>
     <script src='__index__.js'></script>
