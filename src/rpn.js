@@ -103,6 +103,9 @@ export default class RPN{
         }
         return this.__data.map((item)=>({...item}));
     }
+    toJSON(){ //Ailas of getRPN()
+        return this.getRPN();
+    }
     setRPN(input){
         if(!Array.isArray(input)){
             throw new TypeError('Input must be an array with objects contains key "type" and "value"');

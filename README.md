@@ -122,6 +122,10 @@ The code above will generate the following JSON data:
 	
 In the expression above, each token's type value has an alias, you may refer to **Aliases** section for detail.
 
+### `toJSON()`
+
+Alias of `getRPN()` method, used for serialization via `JSON.stringify()`.
+
 ### `setRPN(expr)`
 
 Load previously compiled RPN from other source like database or memcache/redis.
@@ -277,6 +281,10 @@ Script标签
 	]
 	
 在以上逆波兰式中，所有项目的`type`值都有对应的别名，可参考**常用别名**小节。
+
+### `toJSON()`
+
+`getRPN()`方法的别名，在使用`JSON.stringify()`序列化时用到。
 
 ### `setRPN(expr)`
 
