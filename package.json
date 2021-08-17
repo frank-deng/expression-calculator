@@ -1,7 +1,7 @@
 {
   "name": "expression-calculator",
   "sideEffects": false,
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Calculate expressions without using `eval()`, using LL(1) syntax analyzer.",
   "main": "dist/exprcalc.js",
   "scripts": {
